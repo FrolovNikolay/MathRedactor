@@ -2,3 +2,5 @@ Debug/
 *.sdf
 *.suo
 MathRedactor/Debug/
+Release/
+MathRedactor/Release/

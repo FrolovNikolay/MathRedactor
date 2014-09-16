@@ -5,7 +5,7 @@
 
 CMainWindow::CMainWindow() 
 {
-	windowHandle = NULL;
+	windowHandle = 0;
 }
 
 CMainWindow::~CMainWindow()
@@ -38,7 +38,7 @@ bool CMainWindow::Create( LPCWSTR windowName, HINSTANCE ownerInstance )
 	DWORD style = WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_VSCROLL | WS_HSCROLL;
 	windowHandle = ::CreateWindowEx( 0, className, windowName, style, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, 0, 0, ownerInstance, this );
 
-	if( windowHandle == NULL ) {
+	if( windowHandle == 0 ) {
 		return false;
 	}
 
