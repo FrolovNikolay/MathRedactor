@@ -21,9 +21,15 @@
     <ClCompile Include="MainWindow.cpp">
       <Filter>Файлы исходного кода</Filter>
     </ClCompile>
+    <ClCompile Include="EditWindow.cpp">
+      <Filter>Файлы исходного кода</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MainWindow.h">
+      <Filter>Заголовочные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="EditWindow.h">
       <Filter>Заголовочные файлы</Filter>
     </ClInclude>
   </ItemGroup>
