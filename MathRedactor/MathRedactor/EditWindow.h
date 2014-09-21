@@ -4,6 +4,8 @@
 #pragma once
 
 #include <Windows.h>
+#include <vector>
+#include "LineOfSymbols.h"
 
 class CEditWindow {
 public:
@@ -21,10 +23,18 @@ public:
 protected:
 	// метод, вызываемый при получении окном сообщения WM_DESTROY
 	void OnWmDestroy();
+	// метод, вызываемый при получении окном сообщения WM_PAINT
+	void OnWmPaint( );
 
 private:
 	// хэндл окна, которому соответствует этот объект класса.
 	HWND windowHandle;
+
+	//Содержимое редактора (массив строк)
+	std::vector<CLineOfSymbols> content;
+
+	//TODO: Сделать нормальные настройки
+	int lineHeight;
 
 	static LRESULT __stdcall windowProcedure( HWND, UINT, WPARAM, LPARAM );
 };

@@ -65,12 +65,19 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="EditWindow.cpp" />
+    <ClCompile Include="FractionSymbol.cpp" />
+    <ClCompile Include="LineOfSymbols.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainWindow.cpp" />
+    <ClCompile Include="SimpleSymbol.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EditWindow.h" />
+    <ClInclude Include="FractionSymbol.h" />
+    <ClInclude Include="LineOfSymbols.h" />
     <ClInclude Include="MainWindow.h" />
+    <ClInclude Include="SimpleSymbol.h" />
+    <ClInclude Include="Symbol.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
