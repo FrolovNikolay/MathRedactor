@@ -9,7 +9,7 @@
 CEditWindow::CEditWindow()
 {
 	windowHandle = 0;
-	lineHeight = 72;
+	lineHeight = 200;
 
 	//!!!Это извращение, но это для теста!!!
 	CLineOfSymbols line;
@@ -25,7 +25,10 @@ CEditWindow::CEditWindow()
 	CFractionSymbol* fsp2 = new CFractionSymbol( );
 	fsp2->GetUpperLine().Push( fsp );
 	fsp2->GetLowerLine().Push( new CSimpleSymbol( L'1' ) );
-	line.Push( fsp2 );
+	CFractionSymbol* fsp3 = new CFractionSymbol();
+	fsp3->GetUpperLine().Push( fsp->Clone() );
+	fsp3->GetLowerLine().Push( fsp2->Clone() );
+	line.Push( fsp3 );
 	content.push_back( line );
 }
 
