@@ -4,6 +4,10 @@
 #include <assert.h>
 
 // класс CEditWindow
+// константы
+
+const wchar_t* CEditWindow::className = L"MathRedactorEditWindowClass";
+
 // public методы
 
 CEditWindow::CEditWindow()
@@ -38,8 +42,6 @@ CEditWindow::~CEditWindow()
 
 bool CEditWindow::RegisterClass( HINSTANCE classOwnerInstance )
 {
-	const wchar_t* className = L"MathRedactorEditWindowClass";
-
 	WNDCLASSEX classInfo;
 	::ZeroMemory( &classInfo, sizeof( WNDCLASSEX ) );
 	classInfo.cbSize = sizeof( WNDCLASSEX );
@@ -53,8 +55,6 @@ bool CEditWindow::RegisterClass( HINSTANCE classOwnerInstance )
 
 HWND CEditWindow::Create( HWND parent, HINSTANCE ownerInstance )
 {
-	const wchar_t* className = L"MathRedactorEditWindowClass";
-
 	DWORD style = WS_CHILD | WS_VISIBLE | WS_BORDER;
 
 	windowHandle = ::CreateWindowEx( 0, className, 0, style, 0, 0, 0, 0, parent, 0, ownerInstance, this );
@@ -65,6 +65,21 @@ HWND CEditWindow::Create( HWND parent, HINSTANCE ownerInstance )
 void CEditWindow::Show( int nCmdShow )
 {
 	::ShowWindow( windowHandle, nCmdShow );
+}
+
+void CEditWindow::AddSign( wchar_t sign )
+{
+	if( ( sign >= L'a'  &&  sign <= L'z' ) || ( sign >= L'A'  &&  sign <= L'Z' ) || ( sign >= L'0'  &&  sign <= L'9' ) ) {
+		if( content.size() == 0 ) {
+			content.push_back( CLineOfSymbols() );
+		}
+		content.back().Push( new CSimpleSymbol( sign ) );
+		// TODO: оптимизировать (перерисовывать только прямоугольник этой строки
+		RECT clientRect;
+		::GetClientRect( windowHandle, &clientRect );
+		::InvalidateRect( windowHandle, &clientRect, 0 );
+		::UpdateWindow( windowHandle );
+	}
 }
 
 // protected методы
@@ -123,7 +138,7 @@ void CEditWindow::OnWmPaint( )
 
 // private методы
 
-// процедура обрабатывающая сообщения для главного окна
+// процедура обрабатывающая сообщения для окна редактора
 LRESULT __stdcall CEditWindow::windowProcedure( HWND windowHandle, UINT message, WPARAM wParam, LPARAM lParam )
 {
 	if( message == WM_NCCREATE ) {
@@ -137,7 +152,7 @@ LRESULT __stdcall CEditWindow::windowProcedure( HWND windowHandle, UINT message,
 		window->OnWmDestroy();
 		break;
 	case WM_PAINT:
-		window->OnWmPaint( );
+		window->OnWmPaint();
 		break;
 	}
 

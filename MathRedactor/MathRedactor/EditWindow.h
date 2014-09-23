@@ -19,6 +19,10 @@ public:
 	HWND Create( HWND, HINSTANCE );
 	// Отображается окно
 	void Show( int );
+	
+	// Добавляет символ к последней строке и посылает окну уведомление о том, что надо перерисоваться
+	// TODO: добавить фокус строки и позицию для вставки символа
+	void AddSign( wchar_t );
 
 protected:
 	// метод, вызываемый при получении окном сообщения WM_DESTROY
@@ -29,6 +33,8 @@ protected:
 private:
 	// хэндл окна, которому соответствует этот объект класса.
 	HWND windowHandle;
+	// имя класса окна
+	static const wchar_t* className;
 
 	//Содержимое редактора (массив строк)
 	std::vector<CLineOfSymbols> content;

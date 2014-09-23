@@ -29,6 +29,8 @@ protected:
 	void OnWmCreate( HWND );
 	// меняет размеры дочерних окон при изменении размеров родительского
 	void OnWmSize();
+	// заставляет дочернее окно отображать новый символ
+	void OnWmChar( WPARAM );
 
 private:
 	// хэндл окна, которому соответствует этот объект класса.
@@ -37,6 +39,9 @@ private:
 	CEditWindow *editWindow;
 	// хэндл дочернего окна-редактора
 	HWND editHandle;
+	// имя класса окна
+	static const wchar_t* className;
+
 
 	static LRESULT __stdcall windowProcedure( HWND, UINT, WPARAM, LPARAM );
 };

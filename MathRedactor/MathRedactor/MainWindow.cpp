@@ -1,6 +1,10 @@
 ﻿#include "MainWindow.h"
 
 // класс CMainWindow
+// константы
+
+const wchar_t* CMainWindow::className = L"MathRedactorWindowClass";
+
 // public методы 
 
 CMainWindow::CMainWindow() 
@@ -18,8 +22,6 @@ CMainWindow::~CMainWindow()
 
 bool CMainWindow::RegisterClass( HINSTANCE classOwnerInstance )
 {
-	const wchar_t* className = L"MathRedactorWindowClass";
-
 	WNDCLASSEX classInfo;
 	::ZeroMemory( &classInfo, sizeof( WNDCLASSEX ) );
 	classInfo.cbSize = sizeof( WNDCLASSEX );
@@ -32,9 +34,7 @@ bool CMainWindow::RegisterClass( HINSTANCE classOwnerInstance )
 }
 
 bool CMainWindow::Create( LPCWSTR windowName, HINSTANCE ownerInstance, int width, int height )
-{
-	const wchar_t* className = L"MathRedactorWindowClass";
-
+{	
 	DWORD style = WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN;
 	return( ::CreateWindowEx( 0, className, windowName, style, 0, 0, width, height, 0, 0, ownerInstance, this ) != 0 );
 }
@@ -69,6 +69,11 @@ void CMainWindow::OnWmSize()
 	::SetWindowPos( editHandle, 0, 0, 0, clientRect.right, clientRect.bottom, 0 );
 }
 
+void CMainWindow::OnWmChar( WPARAM code )
+{
+	editWindow->AddSign( code );
+}
+
 // private методы
 
 // процедура обрабатывающая сообщения для главного окна
@@ -83,10 +88,16 @@ LRESULT __stdcall CMainWindow::windowProcedure( HWND windowHandle, UINT message,
 	switch( message ) {
 	case WM_CLOSE:
 		window->OnWmDestroy();
+		break;
 	case WM_CREATE:
 		window->OnWmCreate( windowHandle );
+		break;
 	case WM_SIZE:
 		window->OnWmSize();
+		break;
+	case WM_CHAR:
+		window->OnWmChar( wParam );
+		break;
 	}
 
 	return ::DefWindowProc( windowHandle, message, wParam, lParam );
