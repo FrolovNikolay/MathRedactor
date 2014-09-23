@@ -1,13 +1,13 @@
-#include "SimpleSymbol.h"
+п»ї#include "SimpleSymbol.h"
 #include <assert.h>
 #include <wingdi.h>
 
 void CSimpleSymbol::Draw( HDC displayHandle, int posX, int posY, int realHeight, int simpleSymbolHeight ) const
 {
-	//Вычисляем смещение от верхнего края строки
+	//Р’С‹С‡РёСЃР»СЏРµРј СЃРјРµС‰РµРЅРёРµ РѕС‚ РІРµСЂС…РЅРµРіРѕ РєСЂР°СЏ СЃС‚СЂРѕРєРё
 	int offsetTop = (realHeight - simpleSymbolHeight) / 2;
 
-	//Отрисовка (выводим один символ из строки symbol)
+	//РћС‚СЂРёСЃРѕРІРєР° (РІС‹РІРѕРґРёРј РѕРґРёРЅ СЃРёРјРІРѕР» РёР· СЃС‚СЂРѕРєРё symbol)
 	::TextOut( displayHandle, posX, posY + offsetTop, symbol, 1 );
 }
 

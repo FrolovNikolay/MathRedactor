@@ -1,4 +1,4 @@
-#include "LineOfSymbols.h"
+п»ї#include "LineOfSymbols.h"
 #include "FractionSymbol.h"
 #include "SimpleSymbol.h"
 #include <assert.h>
@@ -22,7 +22,7 @@ CLineOfSymbols::~CLineOfSymbols()
 	}
 }
 
-//Добавление символа в конец. Память, переданная по указателю, принадлежит классу.
+//Р”РѕР±Р°РІР»РµРЅРёРµ СЃРёРјРІРѕР»Р° РІ РєРѕРЅРµС†. РџР°РјСЏС‚СЊ, РїРµСЂРµРґР°РЅРЅР°СЏ РїРѕ СѓРєР°Р·Р°С‚РµР»СЋ, РїСЂРёРЅР°РґР»РµР¶РёС‚ РєР»Р°СЃСЃСѓ.
 void CLineOfSymbols::Push( CSymbol* symbol )
 {
 	if( typeid(*symbol) == typeid(CFractionSymbol) ) {
@@ -34,13 +34,13 @@ void CLineOfSymbols::Push( CSymbol* symbol )
 
 void CLineOfSymbols::Draw( HDC displayHandle, int posX, int posY, int realHeight ) const
 {
-	//TODO: Сделать проверку на тот случай, если высота получилась слишком маленькой
+	//TODO: РЎРґРµР»Р°С‚СЊ РїСЂРѕРІРµСЂРєСѓ РЅР° С‚РѕС‚ СЃР»СѓС‡Р°Р№, РµСЃР»Рё РІС‹СЃРѕС‚Р° РїРѕР»СѓС‡РёР»Р°СЃСЊ СЃР»РёС€РєРѕРј РјР°Р»РµРЅСЊРєРѕР№
 	int simpleSymbolHeight = realHeight;
 	if( hasFraction ) {
 		simpleSymbolHeight = (realHeight / 2) - 1;
 	}
 
-	//Устанавливаем шрифт (получаем текущий и обновляем высоту символа)
+	//РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј С€СЂРёС„С‚ (РїРѕР»СѓС‡Р°РµРј С‚РµРєСѓС‰РёР№ Рё РѕР±РЅРѕРІР»СЏРµРј РІС‹СЃРѕС‚Сѓ СЃРёРјРІРѕР»Р°)
 	HFONT oldFont = (HFONT)::GetCurrentObject( displayHandle, OBJ_FONT );
 	assert( oldFont != 0 );
 
@@ -51,14 +51,14 @@ void CLineOfSymbols::Draw( HDC displayHandle, int posX, int posY, int realHeight
 	assert( font != 0 );
 	oldFont = (HFONT)::SelectObject( displayHandle, font );
 
-	//Отрисовка
+	//РћС‚СЂРёСЃРѕРІРєР°
 	for( int i = 0; i < arrayOfSymbolPtrs.size(); ++i ) {
 		assert( arrayOfSymbolPtrs[i] != 0 );
 		arrayOfSymbolPtrs[i]->Draw( displayHandle, posX, posY, realHeight, simpleSymbolHeight );
 		posX += arrayOfSymbolPtrs[i]->CalculateWidth( displayHandle, simpleSymbolHeight );
 	}
 
-	//Возвращаем старый шрифт, удаляем созданный
+	//Р’РѕР·РІСЂР°С‰Р°РµРј СЃС‚Р°СЂС‹Р№ С€СЂРёС„С‚, СѓРґР°Р»СЏРµРј СЃРѕР·РґР°РЅРЅС‹Р№
 	::SelectObject( displayHandle, oldFont );
 	::DeleteObject( font );
 }
@@ -69,7 +69,7 @@ int CLineOfSymbols::CalculateWidth( HDC displayHandle, int realHeight ) const
 	if( hasFraction ) {
 		simpleSymbolHeight = (realHeight / 2) - 1;
 	}
-	//Устанавливаем шрифт (получаем текущий и обновляем высоту символа)
+	//РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј С€СЂРёС„С‚ (РїРѕР»СѓС‡Р°РµРј С‚РµРєСѓС‰РёР№ Рё РѕР±РЅРѕРІР»СЏРµРј РІС‹СЃРѕС‚Сѓ СЃРёРјРІРѕР»Р°)
 	HFONT oldFont = (HFONT)::GetCurrentObject( displayHandle, OBJ_FONT );
 	assert( oldFont != 0 );
 
@@ -86,7 +86,7 @@ int CLineOfSymbols::CalculateWidth( HDC displayHandle, int realHeight ) const
 		result += arrayOfSymbolPtrs[i]->CalculateWidth( displayHandle, simpleSymbolHeight );
 	}
 
-	//Возвращаем старый шрифт, удаляем созданный
+	//Р’РѕР·РІСЂР°С‰Р°РµРј СЃС‚Р°СЂС‹Р№ С€СЂРёС„С‚, СѓРґР°Р»СЏРµРј СЃРѕР·РґР°РЅРЅС‹Р№
 	::SelectObject( displayHandle, oldFont );
 	::DeleteObject( font );
 

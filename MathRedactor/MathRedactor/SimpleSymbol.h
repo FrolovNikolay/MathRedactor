@@ -1,25 +1,25 @@
-//Автор: Давлетшин Азат
+п»ї//РђРІС‚РѕСЂ: Р”Р°РІР»РµС‚С€РёРЅ РђР·Р°С‚
 
 #pragma once
 
 #include "Symbol.h"
 
-//Простой символ (буква, цифра или простой оператор). Нет конструктора по-умолчанию.
+//РџСЂРѕСЃС‚РѕР№ СЃРёРјРІРѕР» (Р±СѓРєРІР°, С†РёС„СЂР° РёР»Рё РїСЂРѕСЃС‚РѕР№ РѕРїРµСЂР°С‚РѕСЂ). РќРµС‚ РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂР° РїРѕ-СѓРјРѕР»С‡Р°РЅРёСЋ.
 class CSimpleSymbol : public CSymbol {
 public:
 	CSimpleSymbol( wchar_t _symbol ) { symbol[0] = _symbol; }
 
-	//Создание копии (deep) объекта
+	//РЎРѕР·РґР°РЅРёРµ РєРѕРїРёРё (deep) РѕР±СЉРµРєС‚Р°
 	virtual CSymbol* Clone() const { return new CSimpleSymbol( *this ); }
 
 	wchar_t GetSymbol() const { return symbol[0]; }
 	void SetSymbol( wchar_t _symbol ) { symbol[0] = _symbol;  }
 
-	//Описание этих методов находится в Symbol.h
+	//РћРїРёСЃР°РЅРёРµ СЌС‚РёС… РјРµС‚РѕРґРѕРІ РЅР°С…РѕРґРёС‚СЃСЏ РІ Symbol.h
 	virtual void Draw( HDC displayHandle, int posX, int posY, int realHeight, int simpleSymbolHeight ) const;
 	virtual int CalculateWidth( HDC displayHandle, int simpleSymbolHeight ) const;
 
 private:
-	//Имя символа (передается в TextOut).
+	//РРјСЏ СЃРёРјРІРѕР»Р° (РїРµСЂРµРґР°РµС‚СЃСЏ РІ TextOut).
 	wchar_t symbol[1];
 };
