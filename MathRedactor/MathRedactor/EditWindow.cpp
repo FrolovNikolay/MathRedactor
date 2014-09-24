@@ -55,7 +55,7 @@ bool CEditWindow::RegisterClass( HINSTANCE classOwnerInstance )
 
 HWND CEditWindow::Create( HWND parent, HINSTANCE ownerInstance )
 {
-	DWORD style = WS_CHILD | WS_VISIBLE | WS_BORDER;
+	DWORD style = WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | WS_HSCROLL;
 
 	windowHandle = ::CreateWindowEx( 0, className, 0, style, 0, 0, 0, 0, parent, 0, ownerInstance, this );
 
@@ -75,10 +75,7 @@ void CEditWindow::AddSign( wchar_t sign )
 		}
 		content.back().Push( new CSimpleSymbol( sign ) );
 		// TODO: оптимизировать (перерисовывать только прямоугольник этой строки
-		RECT clientRect;
-		::GetClientRect( windowHandle, &clientRect );
-		::InvalidateRect( windowHandle, &clientRect, 0 );
-		::UpdateWindow( windowHandle );
+		::RedrawWindow( windowHandle, 0, 0, RDW_INVALIDATE );
 	}
 }
 
