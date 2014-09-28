@@ -33,6 +33,9 @@
     <ClCompile Include="SimpleSymbol.cpp">
       <Filter>Файлы исходного кода</Filter>
     </ClCompile>
+    <ClCompile Include="CommandHandler.cpp">
+      <Filter>Файлы исходного кода</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MainWindow.h">
@@ -53,5 +56,19 @@
     <ClInclude Include="Symbol.h">
       <Filter>Заголовочные файлы</Filter>
     </ClInclude>
+    <ClInclude Include="RibbonIDs.h">
+      <Filter>Заголовочные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="CommandHandler.h">
+      <Filter>Заголовочные файлы</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="RibbonMarkup.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="RibbonResource.rc">
+      <Filter>Файлы ресурсов</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

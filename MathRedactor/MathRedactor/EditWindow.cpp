@@ -10,7 +10,7 @@ const wchar_t* CEditWindow::className = L"MathRedactorEditWindowClass";
 
 // public методы
 
-CEditWindow::CEditWindow()
+CEditWindow::CEditWindow() : horizontalScrollUnit( 30 ), verticalScrollUnit( 15 )
 {
 	windowHandle = 0;
 	lineHeight = 200;
@@ -55,7 +55,7 @@ bool CEditWindow::RegisterClass( HINSTANCE classOwnerInstance )
 
 HWND CEditWindow::Create( HWND parent, HINSTANCE ownerInstance )
 {
-	DWORD style = WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | WS_HSCROLL;
+	DWORD style = WS_CHILD | WS_VISIBLE;
 
 	windowHandle = ::CreateWindowEx( 0, className, 0, style, 0, 0, 0, 0, parent, 0, ownerInstance, this );
 
@@ -133,6 +133,105 @@ void CEditWindow::OnWmPaint( )
 	::EndPaint( windowHandle, &paintInfo );
 }
 
+void CEditWindow::OnWmHScroll( WPARAM wParam, LPARAM lParam )
+{
+	if( lParam == 0 ) {
+		SCROLLINFO scrollInfo;
+		scrollInfo.cbSize = sizeof( SCROLLINFO );
+		scrollInfo.fMask = SIF_ALL;
+		// меняем позицию скролла
+		::GetScrollInfo( windowHandle, SB_HORZ, &scrollInfo );
+		switch( LOWORD( wParam ) ) {
+		case SB_LINELEFT:
+			scrollInfo.nPos += 1;
+			break;
+		case SB_LINERIGHT:
+			scrollInfo.nPos -= 1;
+			break;
+		case SB_PAGELEFT:
+			scrollInfo.nPos += scrollInfo.nPage;
+			break;
+		case SB_PAGERIGHT:
+			scrollInfo.nPos -= scrollInfo.nPage;
+			break;
+		case SB_THUMBTRACK:
+			scrollInfo.nPos = scrollInfo.nTrackPos;
+			break;
+		}
+		// запоминаем и устанавливаем новую позицию скролла
+		int scrollPosition = scrollInfo.nPos;
+		scrollInfo.fMask = SIF_POS;
+		::SetScrollInfo( windowHandle, SB_HORZ, &scrollInfo, TRUE );
+		// и перестраховка, на случай того, что Window сдвинет что-то не так, как ожидалось
+		::GetScrollInfo( windowHandle, SB_HORZ, &scrollInfo );
+		if( scrollInfo.nPos != scrollPosition ) {
+			::ScrollWindow( windowHandle, horizontalScrollUnit * ( scrollPosition - scrollInfo.nPos ), 0, 0, 0 );
+		}
+	}
+}
+
+void CEditWindow::OnWmVScroll( WPARAM wParam, LPARAM lParam )
+{
+	if( lParam == 0 ) {
+		SCROLLINFO scrollInfo;
+		scrollInfo.cbSize = sizeof( SCROLLINFO );
+		scrollInfo.fMask = SIF_ALL;
+		// меняем позицию скролла
+		::GetScrollInfo( windowHandle, SB_VERT, &scrollInfo );
+		switch( LOWORD( wParam ) ) {
+		case SB_LINEUP:
+			scrollInfo.nPos += 1;
+			break;
+		case SB_LINEDOWN:
+			scrollInfo.nPos -= 1;
+			break;
+		case SB_PAGEUP:
+			scrollInfo.nPos += scrollInfo.nPage;
+			break;
+		case SB_PAGEDOWN:
+			scrollInfo.nPos -= scrollInfo.nPage;
+			break;
+		case SB_THUMBTRACK:
+			scrollInfo.nPos = scrollInfo.nTrackPos;
+			break;
+		}
+		// запоминаем и устанавливаем новую позицию скролла
+		int scrollPosition = scrollInfo.nPos;
+		scrollInfo.fMask = SIF_POS;
+		::SetScrollInfo( windowHandle, SB_VERT, &scrollInfo, TRUE );
+		// и перестраховка, на случай того, что Window сдвинет что-то не так, как ожидалось
+		::GetScrollInfo( windowHandle, SB_VERT, &scrollInfo );
+		if( scrollInfo.nPos != scrollPosition ) {
+			::ScrollWindow( windowHandle, 0, verticalScrollUnit * ( scrollPosition - scrollInfo.nPos ), 0, 0 );
+		}
+	}
+}
+
+void CEditWindow::OnWmSize( LPARAM lParam ) 
+{
+	int width = LOWORD( lParam );
+	int hieght = HIWORD( lParam );
+
+	RECT editClientRect, parentClientRect;
+	::GetClientRect( windowHandle, &editClientRect );
+	::GetClientRect( ::GetParent( windowHandle ), &parentClientRect );
+
+	SCROLLINFO scrollInfo;
+	scrollInfo.cbSize = sizeof( SCROLLINFO );
+	scrollInfo.fMask = SIF_RANGE | SIF_PAGE;
+	scrollInfo.nMin = 0;
+
+	// горизонтальный скролл
+	scrollInfo.nMax = editClientRect.right / horizontalScrollUnit;
+	scrollInfo.nPage = editClientRect.right / horizontalScrollUnit;
+	::SetScrollInfo( windowHandle, SB_HORZ, &scrollInfo, TRUE );
+
+	// вертиклаьный скролл
+	scrollInfo.nMax = editClientRect.bottom / verticalScrollUnit;
+	scrollInfo.nPage = editClientRect.bottom / verticalScrollUnit;
+	::SetScrollInfo( windowHandle, SB_VERT, &scrollInfo, TRUE );
+}
+
 // private методы
 
 // процедура обрабатывающая сообщения для окна редактора
@@ -150,6 +249,15 @@ LRESULT __stdcall CEditWindow::windowProcedure( HWND windowHandle, UINT message,
 		break;
 	case WM_PAINT:
 		window->OnWmPaint();
+		break;
+	case WM_HSCROLL:
+		window->OnWmHScroll( wParam, lParam );
+		break;
+	case WM_VSCROLL:
+		window->OnWmVScroll( wParam, lParam );
+		break;
+	case WM_SIZE:
+		window->OnWmSize( lParam );
 		break;
 	}
 

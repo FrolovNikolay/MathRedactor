@@ -28,7 +28,13 @@ protected:
 	// метод, вызываемый при получении окном сообщения WM_DESTROY
 	void OnWmDestroy();
 	// метод, вызываемый при получении окном сообщения WM_PAINT
-	void OnWmPaint( );
+	void OnWmPaint();
+	// скроллирование окон
+	void OnWmHScroll( WPARAM, LPARAM );
+	void OnWmVScroll( WPARAM, LPARAM );
+	// обработка изменения размера окна
+	// пересчитывает некоторые свойства скроллов
+	void OnWmSize( LPARAM );
 
 private:
 	// хэндл окна, которому соответствует этот объект класса.
@@ -41,6 +47,10 @@ private:
 
 	//TODO: Сделать нормальные настройки
 	int lineHeight;
+
+	// для скроллирования
+	const int horizontalScrollUnit;
+	const int verticalScrollUnit;
 
 	static LRESULT __stdcall windowProcedure( HWND, UINT, WPARAM, LPARAM );
 };

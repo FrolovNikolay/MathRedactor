@@ -1,0 +1,29 @@
+// ******************************************************************************
+// * This is an automatically generated file containing the ribbon resource for *
+// * your application.                                                          *
+// ******************************************************************************
+
+#include ".\RibbonIDs.h"
+
+STRINGTABLE 
+BEGIN
+    ID_CMD_SIGMA_LabelTitle_RESID L"sigma" /* LabelTitle ID_CMD_SIGMA_LabelTitle_RESID: (null) */
+END
+
+ID_CMD_SIGMA_LargeImages_RESID    BITMAP    "Res\sigma.bmp" /* LargeImages ID_CMD_SIGMA_LargeImages_RESID: (null) */
+STRINGTABLE 
+BEGIN
+    cmdTabSymbols_LabelTitle_RESID L"Label:cmdTabSymbols" /* LabelTitle cmdTabSymbols_LabelTitle_RESID: (null) */
+END
+
+STRINGTABLE 
+BEGIN
+    cmdGroupSetOperations_LabelTitle_RESID L"Label:cmdGroupSetOperations" /* LabelTitle cmdGroupSetOperations_LabelTitle_RESID: (null) */
+END
+
+STRINGTABLE 
+BEGIN
+    InternalCmd2_LabelTitle_RESID L"Label:InternalCmd2" /* LabelTitle InternalCmd2_LabelTitle_RESID: (null) */
+END
+
+APPLICATION_RIBBON    UIFILE    "RibbonUI.bin"

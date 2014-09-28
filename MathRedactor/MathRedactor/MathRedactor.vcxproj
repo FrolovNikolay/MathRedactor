@@ -64,6 +64,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CommandHandler.cpp" />
     <ClCompile Include="EditWindow.cpp" />
     <ClCompile Include="FractionSymbol.cpp" />
     <ClCompile Include="LineOfSymbols.cpp" />
@@ -72,12 +73,20 @@
     <ClCompile Include="SimpleSymbol.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CommandHandler.h" />
     <ClInclude Include="EditWindow.h" />
     <ClInclude Include="FractionSymbol.h" />
     <ClInclude Include="LineOfSymbols.h" />
     <ClInclude Include="MainWindow.h" />
+    <ClInclude Include="RibbonIDs.h" />
     <ClInclude Include="SimpleSymbol.h" />
     <ClInclude Include="Symbol.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="RibbonMarkup.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="RibbonResource.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

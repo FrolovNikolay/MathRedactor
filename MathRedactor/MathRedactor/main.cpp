@@ -16,6 +16,7 @@ WPARAM MessageLoop()
 
 int __stdcall wWinMain(HINSTANCE hInstance, HINSTANCE prevInstance, LPWSTR commandLine, int nCmdShow)
 {
+	::CoInitialize( 0 );
 	CMainWindow::RegisterClass( hInstance );
 
 	CMainWindow mainWindow;

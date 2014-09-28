@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Application xmlns='http://schemas.microsoft.com/windows/2009/Ribbon'>
+  <Application.Commands>
+    <Command Name="cmdButtonSigma"
+             Symbol="ID_CMD_SIGMA"
+             LabelTitle="sigma">
+      <Command.LargeImages>
+        <Image>Res\sigma.bmp</Image>
+      </Command.LargeImages>
+    </Command>
+  </Application.Commands>
+  <Application.Views>
+    <Ribbon>
+      <Ribbon.Tabs>
+        <Tab CommandName="cmdTabSymbols">
+          <Group CommandName="cmdGroupSetOperations" SizeDefinition="OneButton">
+            <Button CommandName="cmdButtonSigma" />
+          </Group>
+        </Tab>
+      </Ribbon.Tabs>
+    </Ribbon>
+  </Application.Views>
+</Application>

@@ -9,8 +9,11 @@ const wchar_t* CMainWindow::className = L"MathRedactorWindowClass";
 
 CMainWindow::CMainWindow() 
 {
+	referenceCount = 1;
 	windowHandle = 0;
-	editWindow = 0;
+	editWindow = new CEditWindow();
+	commandHandler = new CCommandHandler( editWindow );
+	uiFramework = 0;
 }
 
 CMainWindow::~CMainWindow()
@@ -36,7 +39,8 @@ bool CMainWindow::RegisterClass( HINSTANCE classOwnerInstance )
 bool CMainWindow::Create( LPCWSTR windowName, HINSTANCE ownerInstance, int width, int height )
 {	
 	DWORD style = WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN;
-	return( ::CreateWindowEx( 0, className, windowName, style, 0, 0, width, height, 0, 0, ownerInstance, this ) != 0 );
+	windowHandle = ::CreateWindowEx( 0, className, windowName, style, 0, 0, width, height, 0, 0, ownerInstance, this );
+	return( windowHandle != 0 );
 }
 
 void CMainWindow::Show( int nCmdShow ) 
@@ -44,21 +48,85 @@ void CMainWindow::Show( int nCmdShow )
 	::ShowWindow( windowHandle, nCmdShow );
 }
 
+STDMETHODIMP_( ULONG ) CMainWindow::AddRef()
+{
+	return ::InterlockedIncrement( &referenceCount );
+}
+
+STDMETHODIMP_( ULONG ) CMainWindow::Release()
+{
+	return ::InterlockedDecrement( &referenceCount );
+}
+
+STDMETHODIMP CMainWindow::QueryInterface( REFIID type, void** res )
+{
+	if( type == __uuidof( IUnknown ) ) {
+		*res = static_cast< IUnknown* >( this );
+	} else if( type == __uuidof( IUIApplication ) ) {
+		*res = static_cast< IUIApplication* >( this );
+	}
+	else {
+		*res = 0;
+		return E_NOINTERFACE;
+	}
+
+	AddRef();
+	return S_OK;
+}
+
+STDMETHODIMP CMainWindow::OnCreateUICommand( UINT nCmdId, UI_COMMANDTYPE typeId, IUICommandHandler** _commandHandler )
+{
+	return commandHandler->QueryInterface( IID_PPV_ARGS( _commandHandler ) );
+}
+
+STDMETHODIMP CMainWindow::OnViewChanged( UINT viewId, UI_VIEWTYPE typeId, IUnknown* view, UI_VIEWVERB verb, INT reason )
+{
+	HRESULT res = E_NOTIMPL;
+
+	IUIRibbon* ribbon = 0;
+	if( typeId == UI_VIEWTYPE_RIBBON ) {
+		switch( verb )
+		{
+		case UI_VIEWVERB_CREATE:
+			res = S_OK;
+			break;
+		case UI_VIEWVERB_SIZE:
+			res = view->QueryInterface( IID_PPV_ARGS( &ribbon ) );
+			if( SUCCEEDED( res ) ) {
+				res = ribbon->GetHeight( &ribbonHeight );
+				ribbon->Release();
+			}
+			break;
+		case UI_VIEWVERB_DESTROY:
+			res = S_OK;
+			break;
+		}
+	}
+
+	return res;
+}
+
+STDMETHODIMP CMainWindow::OnDestroyUICommand( UINT32 nCmdId, UI_COMMANDTYPE typeId, IUICommandHandler* _commandHandler ) 
+{
+	return E_NOTIMPL;
+}
+
 // protected методы
 
 void CMainWindow::OnWmDestroy()
 {
+	destroyFramework();
 	::PostQuitMessage( 0 );
 }
 
 void CMainWindow::OnWmCreate( HWND _windowHandle )
 {
+
 	windowHandle = _windowHandle;
 	bool reg = CEditWindow::RegisterClass( ::GetModuleHandle( 0 ) );
 
-	editWindow = new CEditWindow();
-
 	editHandle = editWindow->Create( windowHandle, ::GetModuleHandle( 0 ) );
+	initializeUIFramework();
 }
 
 void CMainWindow::OnWmSize()
@@ -66,7 +134,7 @@ void CMainWindow::OnWmSize()
 	RECT clientRect;
 	::GetClientRect( windowHandle, &clientRect );
 
-	::SetWindowPos( editHandle, 0, 0, 0, clientRect.right, clientRect.bottom, 0 );
+	::SetWindowPos( editHandle, 0, 0, ribbonHeight, clientRect.right, clientRect.bottom, 0 );
 }
 
 void CMainWindow::OnWmChar( WPARAM code )
@@ -75,6 +143,21 @@ void CMainWindow::OnWmChar( WPARAM code )
 }
 
 // private методы
+// инициализирует фремворк для работы риббона
+void CMainWindow::initializeUIFramework()
+{
+	::CoCreateInstance( CLSID_UIRibbonFramework, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS( &uiFramework ) );
+	uiFramework->Initialize( windowHandle, this );
+	uiFramework->LoadUI( ::GetModuleHandle( 0 ), L"APPLICATION_RIBBON" );
+}
+
+// уничтожает ui фреймворк
+void CMainWindow::destroyFramework()
+{
+	uiFramework->Destroy();
+	uiFramework->Release();
+	uiFramework = 0;
+}
 
 // процедура обрабатывающая сообщения для главного окна
 LRESULT __stdcall CMainWindow::windowProcedure( HWND windowHandle, UINT message, WPARAM wParam, LPARAM lParam )
