@@ -54,7 +54,7 @@ STDMETHODIMP CCommandHandler::Execute( UINT nCmdId, UI_EXECUTIONVERB verb, const
 		editWindow->AddSign( L'a' );
 		break;
 	case ID_CMD_FRACTION:
-		CFractionSymbol* fraction = new CFractionSymbol();
+		CFractionSymbol* fraction = new CFractionSymbol( editWindow->GetSimpleSymbolHeight() );
 		fraction->GetUpperLine().Push( new CSimpleSymbol( L'1' ) );
 		fraction->GetLowerLine().Push( new CSimpleSymbol( L'2' ) );
 		editWindow->AddSymbol( fraction );

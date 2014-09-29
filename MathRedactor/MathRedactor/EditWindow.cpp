@@ -15,7 +15,7 @@ const wchar_t* CEditWindow::className = L"MathRedactorEditWindowClass";
 CEditWindow::CEditWindow() : horizontalScrollUnit( 30 ), verticalScrollUnit( 15 )
 {
 	windowHandle = 0;
-	lineHeight = 50;
+	simpleSymbolHeight = 50;
 
 	allowedSymbols = L" +-*/=~%^?><";
 }
@@ -54,7 +54,7 @@ void CEditWindow::Show( int nCmdShow )
 void CEditWindow::AddSymbol( CSymbol* symbol )
 {
 	if( content.size() == 0 ) {
-		content.push_back( CLineOfSymbols() );
+		content.push_back( CLineOfSymbols( simpleSymbolHeight ) );
 	}
 	content.back().Push( symbol );
 	::RedrawWindow( windowHandle, 0, 0, RDW_INVALIDATE | RDW_ERASE );
@@ -76,7 +76,7 @@ void CEditWindow::RemoveSign()
 		return;
 	}
 	if( content.back().Length() == 0 ) {
-		content.resize( content.size() - 1 );
+		content.pop_back();
 	} else {
 		content.back().Pop();
 	}
@@ -86,7 +86,7 @@ void CEditWindow::RemoveSign()
 
 void CEditWindow::NewLine()
 {
-	content.push_back( CLineOfSymbols() );
+	content.push_back( CLineOfSymbols( simpleSymbolHeight ) );
 	::RedrawWindow( windowHandle, 0, 0, RDW_INVALIDATE );
 }
 
@@ -118,7 +118,7 @@ void CEditWindow::OnWmPaint( )
 	::DeleteObject( bgBrush );
 
 	//!!!Сделать настройку шрифта отдельно
-	HFONT font = ::CreateFont( lineHeight, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_DEFAULT_PRECIS,
+	HFONT font = ::CreateFont( simpleSymbolHeight, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_DEFAULT_PRECIS,
 		CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"Arial" );
 	assert( font != 0 );
 
@@ -128,11 +128,13 @@ void CEditWindow::OnWmPaint( )
 	HPEN linePen = ::CreatePen( PS_SOLID, 1, RGB( 0, 0, 0 ) );
 	HPEN oldLinePen = (HPEN) ::SelectObject( displayHandle, linePen );
 
+	//Выравнивание для TextOut (левый верхний угол)
+	::SetTextAlign( displayHandle, TA_LEFT | TA_TOP );
 
 
 	for( int i = 0; i < content.size( ); ++i ) {
-		content[i].Draw( displayHandle, posX, posY, lineHeight );
-		posY += lineHeight;
+		content[i].Draw( displayHandle, posX, posY );
+		posY += content[i].GetHeight();
 	}
 
 	::SelectObject( displayHandle, oldLinePen );

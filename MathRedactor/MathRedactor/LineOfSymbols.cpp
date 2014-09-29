@@ -1,23 +1,31 @@
 ﻿#include "LineOfSymbols.h"
-#include "FractionSymbol.h"
 #include "SimpleSymbol.h"
 #include <assert.h>
 #include <typeinfo>
 
-CLineOfSymbols::CLineOfSymbols( const CLineOfSymbols& src )
-{
-	hasFraction = src.hasFraction;
+CLineOfSymbols::CLineOfSymbols( int _simpleSymbolHeight ) :
+	height( _simpleSymbolHeight ),
+	baselineOffset( 0 ),
+	simpleSymbolHeight( _simpleSymbolHeight )
+{}
 
-	for( int i = 0; i < src.arrayOfSymbolPtrs.size(); ++i ) {
-		CSymbol* symbol = src.arrayOfSymbolPtrs[i]->Clone();
-		assert( symbol != 0 );
-		arrayOfSymbolPtrs.push_back( symbol );
+
+
+CLineOfSymbols::CLineOfSymbols( const CLineOfSymbols& src ) :
+	height( src.height ),
+	baselineOffset( src.baselineOffset ),
+	simpleSymbolHeight( src.simpleSymbolHeight )
+{
+
+	for( int i = 0; i < src.Length(); ++i ) {
+		assert( src[i] != 0 );
+		Push( src[i]->Clone( ) );
 	}
 }
 
-CLineOfSymbols::~CLineOfSymbols()
+CLineOfSymbols::~CLineOfSymbols( )
 {
-	for( int i = 0; i < arrayOfSymbolPtrs.size(); ++i ) {
+	for( int i = 0; i < arrayOfSymbolPtrs.size( ); ++i ) {
 		delete arrayOfSymbolPtrs[i];
 	}
 }
@@ -25,44 +33,13 @@ CLineOfSymbols::~CLineOfSymbols()
 //Добавление символа в конец. Память, переданная по указателю, принадлежит классу.
 void CLineOfSymbols::Push( CSymbol* symbol )
 {
-	if( typeid(*symbol) == typeid(CFractionSymbol) ) {
-		hasFraction = true;
-	}
-
 	arrayOfSymbolPtrs.push_back( symbol );
+	height = max( height, symbol->GetHeight( simpleSymbolHeight ) );
+	baselineOffset = max( baselineOffset, symbol->GetBaselineOffset( simpleSymbolHeight ) );
 }
 
-// Удаление символа из конца строки, при этом символ удаляется
-void CLineOfSymbols::Pop() 
+void CLineOfSymbols::Draw( HDC displayHandle, int posX, int posY ) const
 {
-	if( arrayOfSymbolPtrs.empty() ) {
-		return;
-	}
-
-	CSymbol* toDelete =  arrayOfSymbolPtrs.back();
-	arrayOfSymbolPtrs.resize( arrayOfSymbolPtrs.size() - 1 );
-	delete( toDelete );
-	hasFraction = false;
-	for( int i = 0; i < arrayOfSymbolPtrs.size(); ++i ) {
-		if( typeid( *arrayOfSymbolPtrs[i] ) == typeid( CFractionSymbol ) ) {
-			hasFraction = true;
-			break;
-		}
-	}
-}
-
-int CLineOfSymbols::Length() const
-{
-	return arrayOfSymbolPtrs.size();
-}
-
-void CLineOfSymbols::Draw( HDC displayHandle, int posX, int posY, int realHeight ) const
-{
-	//TODO: Сделать проверку на тот случай, если высота получилась слишком маленькой
-	int simpleSymbolHeight = realHeight;
-	if( hasFraction ) {
-		simpleSymbolHeight = (realHeight / 2) - 1;
-	}
 
 	//Устанавливаем шрифт (получаем текущий и обновляем высоту символа)
 	HFONT oldFont = (HFONT)::GetCurrentObject( displayHandle, OBJ_FONT );
@@ -76,10 +53,10 @@ void CLineOfSymbols::Draw( HDC displayHandle, int posX, int posY, int realHeight
 	oldFont = (HFONT)::SelectObject( displayHandle, font );
 
 	//Отрисовка
-	for( int i = 0; i < arrayOfSymbolPtrs.size(); ++i ) {
+	for( int i = 0; i < arrayOfSymbolPtrs.size( ); ++i ) {
 		assert( arrayOfSymbolPtrs[i] != 0 );
-		arrayOfSymbolPtrs[i]->Draw( displayHandle, posX, posY, realHeight, simpleSymbolHeight );
-		posX += arrayOfSymbolPtrs[i]->CalculateWidth( displayHandle, simpleSymbolHeight );
+		arrayOfSymbolPtrs[i]->Draw( displayHandle, posX, posY + baselineOffset, simpleSymbolHeight );
+		posX += arrayOfSymbolPtrs[i]->CalculateWidth( displayHandle );
 	}
 
 	//Возвращаем старый шрифт, удаляем созданный
@@ -87,12 +64,8 @@ void CLineOfSymbols::Draw( HDC displayHandle, int posX, int posY, int realHeight
 	::DeleteObject( font );
 }
 
-int CLineOfSymbols::CalculateWidth( HDC displayHandle, int realHeight ) const
+int CLineOfSymbols::CalculateWidth( HDC displayHandle ) const
 {
-	int simpleSymbolHeight = realHeight;
-	if( hasFraction ) {
-		simpleSymbolHeight = (realHeight / 2) - 1;
-	}
 	//Устанавливаем шрифт (получаем текущий и обновляем высоту символа)
 	HFONT oldFont = (HFONT)::GetCurrentObject( displayHandle, OBJ_FONT );
 	assert( oldFont != 0 );
@@ -107,7 +80,7 @@ int CLineOfSymbols::CalculateWidth( HDC displayHandle, int realHeight ) const
 	int result = 0;
 	for( int i = 0; i < arrayOfSymbolPtrs.size( ); ++i ) {
 		assert( arrayOfSymbolPtrs[i] != 0 );
-		result += arrayOfSymbolPtrs[i]->CalculateWidth( displayHandle, simpleSymbolHeight );
+		result += arrayOfSymbolPtrs[i]->CalculateWidth( displayHandle );
 	}
 
 	//Возвращаем старый шрифт, удаляем созданный

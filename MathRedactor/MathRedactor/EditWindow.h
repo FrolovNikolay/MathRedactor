@@ -12,6 +12,9 @@ public:
 	CEditWindow();
 	~CEditWindow();
 
+	//Временно
+	int GetSimpleSymbolHeight() const { return simpleSymbolHeight; }
+
 	// регистрирует класс окна
 	static bool RegisterClass( HINSTANCE );
 
@@ -55,7 +58,7 @@ private:
 	std::wstring allowedSymbols;
 
 	//TODO: Сделать нормальные настройки
-	int lineHeight;
+	int simpleSymbolHeight;
 
 	// для скроллирования
 	const int horizontalScrollUnit;
