@@ -3,6 +3,8 @@
 #include "FractionSymbol.h"
 #include <assert.h>
 
+#include <iostream>
+
 // класс CEditWindow
 // константы
 
@@ -13,27 +15,9 @@ const wchar_t* CEditWindow::className = L"MathRedactorEditWindowClass";
 CEditWindow::CEditWindow() : horizontalScrollUnit( 30 ), verticalScrollUnit( 15 )
 {
 	windowHandle = 0;
-	lineHeight = 200;
+	lineHeight = 50;
 
-	//!!!Это извращение, но это для теста!!!
-	CLineOfSymbols line;
-	line.Push( new CSimpleSymbol( L'A' ) );
-	line.Push( new CSimpleSymbol( L'+' ) );
-	line.Push( new CSimpleSymbol( L'5' ) );
-	line.Push( new CSimpleSymbol( L'-' ) );
-	CFractionSymbol* fsp = new CFractionSymbol( );
-	fsp->GetUpperLine( ).Push( new CSimpleSymbol( L'3' ) );
-	fsp->GetUpperLine( ).Push( new CSimpleSymbol( L'+' ) );
-	fsp->GetUpperLine( ).Push( new CSimpleSymbol( L'4' ) );
-	fsp->GetLowerLine( ).Push( new CSimpleSymbol( L'5' ) );
-	CFractionSymbol* fsp2 = new CFractionSymbol( );
-	fsp2->GetUpperLine().Push( fsp );
-	fsp2->GetLowerLine().Push( new CSimpleSymbol( L'1' ) );
-	CFractionSymbol* fsp3 = new CFractionSymbol();
-	fsp3->GetUpperLine().Push( fsp->Clone() );
-	fsp3->GetLowerLine().Push( fsp2->Clone() );
-	line.Push( fsp3 );
-	content.push_back( line );
+	allowedSymbols = L" +-*/=~%^?><";
 }
 
 CEditWindow::~CEditWindow()
@@ -67,16 +51,43 @@ void CEditWindow::Show( int nCmdShow )
 	::ShowWindow( windowHandle, nCmdShow );
 }
 
+void CEditWindow::AddSymbol( CSymbol* symbol )
+{
+	if( content.size() == 0 ) {
+		content.push_back( CLineOfSymbols() );
+	}
+	content.back().Push( symbol );
+	::RedrawWindow( windowHandle, 0, 0, RDW_INVALIDATE | RDW_ERASE );
+}
+
 void CEditWindow::AddSign( wchar_t sign )
 {
-	if( ( sign >= L'a'  &&  sign <= L'z' ) || ( sign >= L'A'  &&  sign <= L'Z' ) || ( sign >= L'0'  &&  sign <= L'9' ) ) {
-		if( content.size() == 0 ) {
-			content.push_back( CLineOfSymbols() );
-		}
-		content.back().Push( new CSimpleSymbol( sign ) );
-		// TODO: оптимизировать (перерисовывать только прямоугольник этой строки
-		::RedrawWindow( windowHandle, 0, 0, RDW_INVALIDATE );
+	if( ( sign >= L'a' && sign <= L'z' ) || ( sign >= L'A' && sign <= L'Z' ) || ( sign >= L'0' && sign <= L'9' ) ||
+		allowedSymbols.find( sign ) != std::wstring::npos )
+	{
+		AddSymbol( new CSimpleSymbol( sign ) );
 	}
+}
+
+void CEditWindow::RemoveSign()
+{
+	std::cerr << "REMOVE SIGN CALLED\n";
+	if( content.size() == 0 ) {
+		return;
+	}
+	if( content.back().Length() == 0 ) {
+		content.resize( content.size() - 1 );
+	} else {
+		content.back().Pop();
+	}
+	::RedrawWindow( windowHandle, 0, 0, RDW_INVALIDATE );
+	std::cerr << "REMOVE SIGN ENDED\n";
+}
+
+void CEditWindow::NewLine()
+{
+	content.push_back( CLineOfSymbols() );
+	::RedrawWindow( windowHandle, 0, 0, RDW_INVALIDATE );
 }
 
 // protected методы

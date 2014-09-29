@@ -8,6 +8,13 @@
         <Image>Res\sigma.bmp</Image>
       </Command.LargeImages>
     </Command>
+    <Command Name="cmdButtonFraction"
+             Symbol="ID_CMD_FRACTION"
+             LabelTitle="fraction">
+      <Command.LargeImages>
+        <Image>Res\fraction.bmp</Image>
+      </Command.LargeImages>
+    </Command>
   </Application.Commands>
   <Application.Views>
     <Ribbon>
@@ -15,6 +22,9 @@
         <Tab CommandName="cmdTabSymbols">
           <Group CommandName="cmdGroupSetOperations" SizeDefinition="OneButton">
             <Button CommandName="cmdButtonSigma" />
+          </Group>
+          <Group CommandName="cmdGroupNumberOperations" SizeDefinition="OneButton">
+            <Button CommandName="cmdButtonFraction" />
           </Group>
         </Tab>
       </Ribbon.Tabs>

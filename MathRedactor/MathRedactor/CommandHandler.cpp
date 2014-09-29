@@ -1,5 +1,7 @@
 ﻿// Автор: Федюнин Валерий
 
+#include "FractionSymbol.h"
+#include "SimpleSymbol.h"
 #include "CommandHandler.h"
 #include "RibbonIDs.h"
 
@@ -50,6 +52,12 @@ STDMETHODIMP CCommandHandler::Execute( UINT nCmdId, UI_EXECUTIONVERB verb, const
 		editWindow->AddSign( L'g' );
 		editWindow->AddSign( L'm' );
 		editWindow->AddSign( L'a' );
+		break;
+	case ID_CMD_FRACTION:
+		CFractionSymbol* fraction = new CFractionSymbol();
+		fraction->GetUpperLine().Push( new CSimpleSymbol( L'1' ) );
+		fraction->GetLowerLine().Push( new CSimpleSymbol( L'2' ) );
+		editWindow->AddSymbol( fraction );
 		break;
 	}
 

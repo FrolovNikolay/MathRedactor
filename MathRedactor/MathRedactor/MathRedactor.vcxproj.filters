@@ -71,4 +71,17 @@
       <Filter>Файлы ресурсов</Filter>
     </ResourceCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="Res\sigma.bmp">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
+    <Image Include="Res\fraction.bmp">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="RibbonUI.bin">
+      <Filter>Файлы ресурсов</Filter>
+    </None>
+  </ItemGroup>
 </Project>

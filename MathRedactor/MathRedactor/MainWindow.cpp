@@ -140,6 +140,21 @@ void CMainWindow::OnWmSize()
 void CMainWindow::OnWmChar( WPARAM code )
 {
 	editWindow->AddSign( code );
+	if( code == 0x0D ) {
+		editWindow->NewLine();
+	}
+}
+
+void CMainWindow::OnWmKeydown( WPARAM code )
+{
+	switch( code ) {
+	case VK_SPACE:
+		editWindow->AddSign( L' ' );
+		break;
+	case VK_BACK:
+		editWindow->RemoveSign();
+		break;
+	}
 }
 
 // private методы
@@ -181,6 +196,8 @@ LRESULT __stdcall CMainWindow::windowProcedure( HWND windowHandle, UINT message,
 	case WM_CHAR:
 		window->OnWmChar( wParam );
 		break;
+	case WM_KEYDOWN:
+		window->OnWmKeydown( wParam );
 	}
 
 	return ::DefWindowProc( windowHandle, message, wParam, lParam );

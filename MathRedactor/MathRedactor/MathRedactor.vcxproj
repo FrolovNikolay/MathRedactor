@@ -88,6 +88,13 @@
   <ItemGroup>
     <ResourceCompile Include="RibbonResource.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="Res\fraction.bmp" />
+    <Image Include="Res\sigma.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="RibbonUI.bin" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

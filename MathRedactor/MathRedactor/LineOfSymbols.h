@@ -21,7 +21,11 @@ public:
 
 	//Добавить символ в конец строки (память, переданная по указателю, будет освобождена в деструкторе класса CLineOfSymbols)
 	void Push( CSymbol* symbol );
+	// Удалить символ из конца строки
+	void Pop();
 
+	// Вернуть длину строки
+	int Length() const;
 	//TODO: Определить эти методы
 	const CSymbol* operator[] ( int index ) const;
 	CSymbol* operator[] ( int index );
@@ -30,5 +34,4 @@ private:
 	std::vector<CSymbol*> arrayOfSymbolPtrs;
 	//Флаг наличия дроби (от этого зависит simpleSymbolHeight)
 	bool hasFraction;
-
 };

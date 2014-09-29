@@ -13,12 +13,23 @@ END
 ID_CMD_SIGMA_LargeImages_RESID    BITMAP    "Res\sigma.bmp" /* LargeImages ID_CMD_SIGMA_LargeImages_RESID: (null) */
 STRINGTABLE 
 BEGIN
+    ID_CMD_FRACTION_LabelTitle_RESID L"fraction" /* LabelTitle ID_CMD_FRACTION_LabelTitle_RESID: (null) */
+END
+
+ID_CMD_FRACTION_LargeImages_RESID    BITMAP    "Res\fraction.bmp" /* LargeImages ID_CMD_FRACTION_LargeImages_RESID: (null) */
+STRINGTABLE 
+BEGIN
     cmdTabSymbols_LabelTitle_RESID L"Label:cmdTabSymbols" /* LabelTitle cmdTabSymbols_LabelTitle_RESID: (null) */
 END
 
 STRINGTABLE 
 BEGIN
     cmdGroupSetOperations_LabelTitle_RESID L"Label:cmdGroupSetOperations" /* LabelTitle cmdGroupSetOperations_LabelTitle_RESID: (null) */
+END
+
+STRINGTABLE 
+BEGIN
+    cmdGroupNumberOperations_LabelTitle_RESID L"Label:cmdGroupNumberOperations" /* LabelTitle cmdGroupNumberOperations_LabelTitle_RESID: (null) */
 END
 
 STRINGTABLE 

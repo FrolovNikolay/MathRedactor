@@ -32,6 +32,30 @@ void CLineOfSymbols::Push( CSymbol* symbol )
 	arrayOfSymbolPtrs.push_back( symbol );
 }
 
+// Удаление символа из конца строки, при этом символ удаляется
+void CLineOfSymbols::Pop() 
+{
+	if( arrayOfSymbolPtrs.empty() ) {
+		return;
+	}
+
+	CSymbol* toDelete =  arrayOfSymbolPtrs.back();
+	arrayOfSymbolPtrs.resize( arrayOfSymbolPtrs.size() - 1 );
+	delete( toDelete );
+	hasFraction = false;
+	for( int i = 0; i < arrayOfSymbolPtrs.size(); ++i ) {
+		if( typeid( *arrayOfSymbolPtrs[i] ) == typeid( CFractionSymbol ) ) {
+			hasFraction = true;
+			break;
+		}
+	}
+}
+
+int CLineOfSymbols::Length() const
+{
+	return arrayOfSymbolPtrs.size();
+}
+
 void CLineOfSymbols::Draw( HDC displayHandle, int posX, int posY, int realHeight ) const
 {
 	//TODO: Сделать проверку на тот случай, если высота получилась слишком маленькой
