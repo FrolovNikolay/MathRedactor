@@ -154,6 +154,18 @@ void CMainWindow::OnWmKeydown( WPARAM code )
 	case VK_BACK:
 		editWindow->RemoveSign();
 		break;
+	case VK_LEFT:
+		editWindow->MoveCaret( CEditWindow::DLeft );
+		break;
+	case VK_RIGHT:
+		editWindow->MoveCaret( CEditWindow::DRight );
+		break;
+	case VK_UP:
+		editWindow->MoveCaret( CEditWindow::DUp );
+		break;
+	case VK_DOWN:
+		editWindow->MoveCaret( CEditWindow::DDown );
+		break;
 	}
 }
 

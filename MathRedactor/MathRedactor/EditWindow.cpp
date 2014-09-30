@@ -3,8 +3,6 @@
 #include "FractionSymbol.h"
 #include <assert.h>
 
-#include <iostream>
-
 // класс CEditWindow
 // константы
 
@@ -12,12 +10,9 @@ const wchar_t* CEditWindow::className = L"MathRedactorEditWindowClass";
 
 // public методы
 
-CEditWindow::CEditWindow() : horizontalScrollUnit(30), verticalScrollUnit(15), caret( this )
+CEditWindow::CEditWindow() : horizontalScrollUnit( 30 ), verticalScrollUnit( 15 ), simpleSymbolHeight( 50 ), caret( this )
 {
 	windowHandle = 0;
-	simpleSymbolHeight = 50;
-
-	caret = CCaret( this );
 
 	allowedSymbols = L" +-*/=~%^?><";
 	
@@ -59,7 +54,7 @@ void CEditWindow::Show( int nCmdShow )
 void CEditWindow::AddSymbol( CSymbol* symbol )
 {
 	content.back().Push( symbol );
-	caret.Move( CCaret::DRight );
+	caret.Move( DRight );
 	::RedrawWindow( windowHandle, 0, 0, RDW_INVALIDATE | RDW_ERASE );
 }
 
@@ -84,7 +79,7 @@ void CEditWindow::RemoveSign()
 		}
 	} else {
 		content.back().Pop();
-		caret.Move( CCaret::DLeft );
+		caret.Move( DLeft );
 	}
 	::RedrawWindow( windowHandle, 0, 0, RDW_INVALIDATE );
 }
@@ -108,6 +103,16 @@ void CEditWindow::HideCaret()
 	caret.Destroy();
 }
 
+void CEditWindow::MoveCaret( CEditWindow::TDirection direction )
+{
+	caret.Move( direction );
+}
+
+void CEditWindow::MoveCaretTo( int x, int y )
+{
+	// TODO
+}
+
 // protected методы
 
 void CEditWindow::OnWmDestroy() {
@@ -117,6 +122,7 @@ void CEditWindow::OnWmDestroy() {
 //TODO: Сделать нормальный метод
 void CEditWindow::OnWmPaint( )
 {
+	// мы запоминаем состояние каретки до перерисовки
 	bool caretShown = caret.IsShown();
 	if( caretShown ) {
 		caret.Hide();
@@ -166,7 +172,7 @@ void CEditWindow::OnWmPaint( )
 	::DeleteObject( font );
 
 	::EndPaint( windowHandle, &paintInfo );
-	
+	// если каретка показывалась до перерисовки, то отображаем ее
 	if( caretShown ) {
 		caret.Show();
 	}
@@ -323,23 +329,7 @@ void CEditWindow::CCaret::Create()
 
 void CEditWindow::CCaret::Show()
 {
-	if( line->Length() == 0 ) {
-		::SetCaretPos( 0, 0 );
-	} else if( index == line->Length() ) {
-		if( ( *line )[index - 1]->GetHeight() != height ) {
-			height = ( *line )[index - 1]->GetHeight();
-			Destroy();
-			Create();
-		}
-		::SetCaretPos( ( *line )[index - 1]->GetX() + ( *line )[index - 1]->GetWidth(), ( *line )[index - 1]->GetY() );
-	} else {
-		if( ( *line )[index]->GetHeight() != height ) {
-			height = ( *line )[index]->GetHeight();
-			Destroy();
-			Create();
-		}
-		::SetCaretPos( ( *line )[index]->GetX(), ( *line )[index]->GetY() );
-	}
+	moveToNewCoordinates();
 	if( !shown ) {
 		shown = ::ShowCaret( window->windowHandle );
 	}
@@ -347,8 +337,10 @@ void CEditWindow::CCaret::Show()
 
 void CEditWindow::CCaret::Hide()
 {
-	::HideCaret( window->windowHandle );
-	shown = false;
+	if( shown ) {
+		::HideCaret( window->windowHandle );
+		shown = false;
+	}
 }
 
 void CEditWindow::CCaret::Destroy()
@@ -357,7 +349,7 @@ void CEditWindow::CCaret::Destroy()
 	::DestroyCaret();
 }
 
-void CEditWindow::CCaret::Move( CEditWindow::CCaret::TDirection direction )
+void CEditWindow::CCaret::Move( CEditWindow::TDirection direction )
 {
 	switch( direction ) {
 	case DUp:
@@ -386,29 +378,69 @@ bool CEditWindow::CCaret::IsShown() const
 	return shown;
 }
 
-// движения каретки на один шаг
-// вынесены в отдельные функции для того
-// чтобы функция CEditWindow::CCaret::Move не получилась слишком большой
+// этот код вынесен в отдельные методы
+// для того чтобы функция CEditWindow::CCaret::Move не получилась слишком большой
+
+// сдвигает каретку на единицу вверх
 void CEditWindow::CCaret::moveUp()
 {
 
 }
 
+// сдвигает каретку на единицу вниз
 void CEditWindow::CCaret::moveDown()
 {
 
 }
 
+// сдвигает каретку на единицу влево
 void CEditWindow::CCaret::moveLeft()
 {
 	if( index > 0 ) {
 		--index;
+		moveToNewCoordinates();
 	}
 }
 
+// сдвигает каретку на единицу в право
 void CEditWindow::CCaret::moveRight()
 {
 	if( line->Length() > index ) {
 		++index;
+		moveToNewCoordinates();
+	}
+}
+
+void CEditWindow::CCaret::moveToNewCoordinates()
+{
+	int x, y;
+	int newHeight = height;
+	if( line->Length() == 0 ) {
+		x = 0;
+		y = 0;
+		height = window->simpleSymbolHeight;
+	} else if( index == 0 ) {
+		newHeight = ( *line )[index]->GetHeight();
+		x = max( 0, ( *line )[index]->GetX() );
+		y = max( 0, ( *line )[index]->GetY() );
+	} else {
+		newHeight = ( *line )[index - 1]->GetHeight();
+		x = max( 0, ( *line )[index - 1]->GetX() + ( *line )[index - 1]->GetWidth() );
+		y = max( 0, ( *line )[index - 1]->GetY() );
+	}
+	if( newHeight > 0 && newHeight != height ) {
+		changeHeight( newHeight );
+	}
+	::SetCaretPos( x, y );
+}
+
+void CEditWindow::CCaret::changeHeight( int newHeight )
+{
+	bool wasShown = shown;
+	height = newHeight;
+	Destroy();
+	Create();
+	if( wasShown ) {
+		Show();
 	}
 }

@@ -31,11 +31,19 @@ public:
 	void RemoveSign();
 	// Переводит строчку
 	void NewLine();
-
+	
+	// возможные направления движения каретки
+	enum TDirection {
+		DUp, DDown, DLeft, DRight
+	};
 	// Отображает каретку
 	void ShowCaret();
 	// Скрывает каретку
 	void HideCaret();
+	// Двигает каретку на шаг по направлению
+	void MoveCaret( TDirection );
+	// Двигает каретку к данной точке
+	void MoveCaretTo( int x, int y );
 
 protected:
 	// метод, вызываемый при получении окном сообщения WM_DESTROY
@@ -83,10 +91,6 @@ private:
 		// показывает/скрывает каретку
 		void Show();
 		void Hide();
-
-		enum TDirection {
-			DUp, DDown, DLeft, DRight
-		};
 		
 		// сдвигает каретку на единицу в данном направлении
 		void Move( TDirection );
@@ -112,6 +116,9 @@ private:
 		void moveRight();
 		void moveUp();
 		void moveDown();
+
+		void moveToNewCoordinates();
+		void changeHeight( int );
 	};
 
 	// каретка
