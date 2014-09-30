@@ -51,6 +51,9 @@ protected:
 	void OnWmChar( WPARAM );
 	// обрабатывает сообщения с системных клавиш
 	void OnWmKeydown( WPARAM );
+	// обрабатывает смену фокуса (скрывает/показывает каретку)
+	void OnWmSetFocus();
+	void OnWmKillFocus();
 
 private:
 	// хэндл окна, которому соответствует этот объект класса.

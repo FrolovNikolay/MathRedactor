@@ -32,6 +32,10 @@ public:
 	// Переводит строчку
 	void NewLine();
 
+	// Отображает каретку
+	void ShowCaret();
+	// Скрывает каретку
+	void HideCaret();
 
 protected:
 	// метод, вызываемый при получении окном сообщения WM_DESTROY
@@ -65,4 +69,51 @@ private:
 	const int verticalScrollUnit;
 
 	static LRESULT __stdcall windowProcedure( HWND, UINT, WPARAM, LPARAM );
+	
+	// Класс каретки для этого типа окна
+	class CCaret {
+	public:
+		CCaret( CEditWindow* );
+
+		bool IsShown() const;
+
+		void Create();
+		void Destroy();
+
+		// показывает/скрывает каретку
+		void Show();
+		void Hide();
+
+		enum TDirection {
+			DUp, DDown, DLeft, DRight
+		};
+		
+		// сдвигает каретку на единицу в данном направлении
+		void Move( TDirection );
+		// сдвигает каретку в определенную позицию
+		void MoveTo( CLineOfSymbols*, int );
+
+	private:
+		// окно, которому принадлежит каретка
+		CEditWindow* window;
+		// текущий размер каретки
+		int width;
+		int height;
+		// положение каретки
+		// линия, в которой находится каретка
+		CLineOfSymbols* line;
+		// индекс символа, перед которым стоит каретка
+		// если равен длине строки - каретка стоит в конце строки
+		int index;
+		// отображается ли каретка в данный момент
+		bool shown;
+
+		void moveLeft();
+		void moveRight();
+		void moveUp();
+		void moveDown();
+	};
+
+	// каретка
+	CCaret caret;
 };

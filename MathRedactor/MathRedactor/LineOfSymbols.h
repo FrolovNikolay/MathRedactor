@@ -24,7 +24,7 @@ public:
 
 	//Добавить символ в конец строки (память, переданная по указателю, будет освобождена в деструкторе класса CLineOfSymbols)
 	void Push( CSymbol* symbol );
-	void Pop() { delete arrayOfSymbolPtrs.back(); arrayOfSymbolPtrs.pop_back(); recalculate(); }
+	void Pop( ) { delete arrayOfSymbolPtrs.back(); arrayOfSymbolPtrs.pop_back(); recalculate(); }
 	int Length( ) const { return static_cast<int>(arrayOfSymbolPtrs.size( )); }
 
 	const CSymbol* operator[] ( int index ) const { return arrayOfSymbolPtrs[index]; }

@@ -157,6 +157,16 @@ void CMainWindow::OnWmKeydown( WPARAM code )
 	}
 }
 
+void CMainWindow::OnWmSetFocus()
+{
+	editWindow->ShowCaret();
+}
+
+void CMainWindow::OnWmKillFocus()
+{
+	editWindow->HideCaret();
+}
+
 // private методы
 // инициализирует фремворк для работы риббона
 void CMainWindow::initializeUIFramework()
@@ -198,6 +208,13 @@ LRESULT __stdcall CMainWindow::windowProcedure( HWND windowHandle, UINT message,
 		break;
 	case WM_KEYDOWN:
 		window->OnWmKeydown( wParam );
+		break;
+	case WM_SETFOCUS:
+		window->OnWmSetFocus();
+		break;
+	case WM_KILLFOCUS:
+		window->OnWmKillFocus();
+		break;
 	}
 
 	return ::DefWindowProc( windowHandle, message, wParam, lParam );
