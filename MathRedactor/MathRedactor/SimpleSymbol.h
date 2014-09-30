@@ -14,7 +14,7 @@ public:
 	CSimpleSymbol( wchar_t _symbol ) { symbol[0] = _symbol; }
 
 	//Получить высоту символа
-	virtual int GetHeight( int simpleSymbolHeight ) const;
+	virtual int GetHeight( int simpleSymbolHeight ) const { return simpleSymbolHeight; }
 	virtual int GetBaselineOffset( int simpleSymbolHeight ) const { return 0; }
 
 	//Создание копии (deep) объекта

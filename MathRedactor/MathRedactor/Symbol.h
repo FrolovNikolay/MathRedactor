@@ -10,10 +10,14 @@ class CLineOfSymbols;
 //Нельзя использовать, не добавив к строке
 class CSymbol {
 public:
+	CSymbol() : x( -1 ), y( -1 ), width( -1 ), height( -1 ) {}
 	virtual ~CSymbol( ) {}
-
-	//Получить высоту символа
+	
+	int GetX() const { return x; }
+	int GetY() const { return y; }
+	int GetHeight() const { return height; }
 	virtual int GetHeight( int simpleSymbolHeight ) const = 0;
+	int GetWidth() const { return width; }
 	//Получить сдвиг базовой линии
 	virtual int GetBaselineOffset( int simpleSymbolHeight ) const = 0;
 
@@ -25,4 +29,11 @@ public:
 	virtual void Draw( HDC displayHandle, int posX, int posY, int simpleSymbolHeight ) const = 0;
 	//Рассчитать ширину символа
 	virtual int CalculateWidth( HDC displayHandle ) const = 0;
+protected:
+	//Левый верхний угол, ширина, высота (обновляется при перерисовке)
+	//Служебная инфа, поэтому mutable (символ сам от этого не меняется)
+	mutable int x;
+	mutable int y;
+	mutable int width;
+	mutable int height;
 };

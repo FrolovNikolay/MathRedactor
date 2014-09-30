@@ -33,6 +33,13 @@ void CFractionSymbol::Draw( HDC displayHandle, int posX, int posY, int simpleSym
 	int lowerStartY = strokeStartY + getStrokeHeight( ) + getLowerOffset( );
 	lowerLine.Draw( displayHandle, lowerStartX, lowerStartY );
 
+	//Обновление служебной информации
+	x = posX;
+	y = upperStartY;
+	width = strokeWidth;
+	height = upperLine.GetHeight( ) + lowerLine.GetHeight( ) + getUpperOffset( ) +
+		getLowerOffset( ) + getStrokeHeight( );
+
 }
 
 int CFractionSymbol::CalculateWidth( HDC displayHandle ) const
@@ -40,7 +47,9 @@ int CFractionSymbol::CalculateWidth( HDC displayHandle ) const
 	int upperWidth = upperLine.CalculateWidth( displayHandle );
 	int lowerWidth = lowerLine.CalculateWidth( displayHandle );
 
-	return max( upperWidth, lowerWidth ) + 2 * getStrokeAddition( );
+	width = max( upperWidth, lowerWidth ) + 2 * getStrokeAddition( );
+
+	return width;
 }
 
 int CFractionSymbol::GetHeight( int simpleSymbolHeight ) const
