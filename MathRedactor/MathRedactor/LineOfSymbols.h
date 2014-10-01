@@ -14,6 +14,9 @@ public:
 	CLineOfSymbols( const CLineOfSymbols& src );
 	~CLineOfSymbols( );
 
+	int GetX() const { return x; }
+	int GetY() const { return y; }
+	int GetWidth() const { return width; }
 	int GetHeight( ) const { return height; }
 	int GetSimpleSymbolHeight( ) const { return simpleSymbolHeight; }
 
@@ -30,10 +33,10 @@ public:
 	const CSymbol* operator[] ( int index ) const { return arrayOfSymbolPtrs[index]; }
 	CSymbol* operator[] ( int index ) { return arrayOfSymbolPtrs[index]; }
 
+
+
 private:
 	std::vector<CSymbol*> arrayOfSymbolPtrs;
-	//Высота строки (может меняться в процессе ввода)
-	int height;
 	//Сдвиг базовой линии относительно верха строки. Служит для позиционирования символов (верхняя точка простых символов).
 	int baselineOffset;
 	//Размер (высота) базового символа. Меняется только специальным методом.
@@ -41,4 +44,11 @@ private:
 
 	//Пересчитать высоты
 	void recalculate();
+
+	//Левый верхний угол, ширина, высота (обновляется при перерисовке)
+	//Служебная инфа, поэтому mutable (символ сам от этого не меняется)
+	mutable int x;
+	mutable int y;
+	mutable int width;
+	mutable int height;
 };

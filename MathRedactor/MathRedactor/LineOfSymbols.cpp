@@ -9,8 +9,6 @@ CLineOfSymbols::CLineOfSymbols( int _simpleSymbolHeight ) :
 	simpleSymbolHeight( _simpleSymbolHeight )
 {}
 
-
-
 CLineOfSymbols::CLineOfSymbols( const CLineOfSymbols& src ) :
 	height( src.height ),
 	baselineOffset( src.baselineOffset ),
@@ -44,6 +42,9 @@ void CLineOfSymbols::Draw( HDC displayHandle, int posX, int posY ) const
 	//Устанавливаем шрифт (получаем текущий и обновляем высоту символа)
 	HFONT oldFont = (HFONT)::GetCurrentObject( displayHandle, OBJ_FONT );
 	assert( oldFont != 0 );
+	
+	x = posX;
+	y = posY;
 
 	LOGFONT fontInfo;
 	::GetObject( oldFont, sizeof(LOGFONT), &fontInfo );

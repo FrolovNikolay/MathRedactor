@@ -416,9 +416,9 @@ void CEditWindow::CCaret::moveToNewCoordinates()
 	int x, y;
 	int newHeight = height;
 	if( line->Length() == 0 ) {
-		x = 0;
-		y = 0;
-		height = window->simpleSymbolHeight;
+		x = line->GetX();
+		y = line->GetY();
+		newHeight = line->GetHeight();
 	} else if( index == 0 ) {
 		newHeight = ( *line )[index]->GetHeight();
 		x = max( 0, ( *line )[index]->GetX() );
