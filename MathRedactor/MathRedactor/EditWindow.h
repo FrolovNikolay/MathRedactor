@@ -66,17 +66,12 @@ private:
 	//Содержимое редактора (массив строк)
 	std::vector<CLineOfSymbols> content;
 	
-	// Строка со спец символами, допуститмымми в нашем редакторе
-	std::wstring allowedSymbols;
-
 	//TODO: Сделать нормальные настройки
 	int simpleSymbolHeight;
 
 	// для скроллирования
 	const int horizontalScrollUnit;
 	const int verticalScrollUnit;
-
-	static LRESULT __stdcall windowProcedure( HWND, UINT, WPARAM, LPARAM );
 	
 	// Класс каретки для этого типа окна
 	class CCaret {
@@ -123,4 +118,8 @@ private:
 
 	// каретка
 	CCaret caret;
+
+	static LRESULT __stdcall windowProcedure( HWND, UINT, WPARAM, LPARAM );
+
+	bool isSymbolAllowed( wchar_t ) const;
 };

@@ -13,8 +13,6 @@ const wchar_t* CEditWindow::className = L"MathRedactorEditWindowClass";
 CEditWindow::CEditWindow() : horizontalScrollUnit( 30 ), verticalScrollUnit( 15 ), simpleSymbolHeight( 50 ), caret( this )
 {
 	windowHandle = 0;
-
-	allowedSymbols = L" +-*/=~%^?><";
 	
 	content.push_back( CLineOfSymbols( simpleSymbolHeight ) );
 	caret.MoveTo( &content[0], 0 );
@@ -60,9 +58,7 @@ void CEditWindow::AddSymbol( CSymbol* symbol )
 
 void CEditWindow::AddSign( wchar_t sign )
 {
-	if( ( sign >= L'a' && sign <= L'z' ) || ( sign >= L'A' && sign <= L'Z' ) || ( sign >= L'0' && sign <= L'9' ) ||
-		allowedSymbols.find( sign ) != std::wstring::npos )
-	{
+	if( isSymbolAllowed( sign ) ) {
 		AddSymbol( new CSimpleSymbol( sign ) );
 	}
 }
@@ -434,6 +430,7 @@ void CEditWindow::CCaret::moveToNewCoordinates()
 	::SetCaretPos( x, y );
 }
 
+// меняет высоту каретки
 void CEditWindow::CCaret::changeHeight( int newHeight )
 {
 	bool wasShown = shown;
@@ -443,4 +440,12 @@ void CEditWindow::CCaret::changeHeight( int newHeight )
 	if( wasShown ) {
 		Show();
 	}
+}
+
+// проверяет, допустим ли данный символ
+bool CEditWindow::isSymbolAllowed( wchar_t symbol ) const
+{
+	std::wstring allowedOperators = L"+-/*=^~";
+	return ( allowedOperators.find(symbol) != std::wstring::npos || symbol == L' ' || ( symbol >= '0' && symbol <= '9' ) ||
+		( symbol >= 'a'  &&  symbol <= 'z' ) || ( symbol >= 'A'  &&  symbol <= 'Z' ) );
 }
