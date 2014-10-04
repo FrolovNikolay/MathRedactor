@@ -25,9 +25,12 @@ public:
 	//Рассчитать ширину строки (линейно по количеству символов в строке, включая символы в сложных символах)
 	int CalculateWidth( HDC displayHandle ) const;
 
-	//Добавить символ в конец строки (память, переданная по указателю, будет освобождена в деструкторе класса CLineOfSymbols)
-	void Push( CSymbol* symbol );
+	// Добавление символа в позицию index
+	// Если index лежит за пределами строки то добавляет в конец строки
+	void CLineOfSymbols::Push( CSymbol* symbol, int index );
+	//Убирает символ из конца строки
 	void Pop( ) { delete arrayOfSymbolPtrs.back(); arrayOfSymbolPtrs.pop_back(); recalculate(); }
+	//Возвращает длину строки
 	int Length( ) const { return static_cast<int>(arrayOfSymbolPtrs.size( )); }
 
 	const CSymbol* operator[] ( int index ) const { return arrayOfSymbolPtrs[index]; }

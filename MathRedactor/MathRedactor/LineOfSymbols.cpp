@@ -17,7 +17,7 @@ CLineOfSymbols::CLineOfSymbols( const CLineOfSymbols& src ) :
 
 	for( int i = 0; i < src.Length(); ++i ) {
 		assert( src[i] != 0 );
-		Push( src[i]->Clone( ) );
+		Push( src[i]->Clone( ), i );
 	}
 }
 
@@ -28,10 +28,17 @@ CLineOfSymbols::~CLineOfSymbols( )
 	}
 }
 
-//Добавление символа в конец. Память, переданная по указателю, принадлежит классу.
-void CLineOfSymbols::Push( CSymbol* symbol )
+void CLineOfSymbols::Push( CSymbol* symbol, int index )
 {
-	arrayOfSymbolPtrs.push_back( symbol );
+	if( index < 0 ) {
+		//TODO: add an error or exception
+		return;
+	}
+	if( index >= arrayOfSymbolPtrs.size() ) {
+		arrayOfSymbolPtrs.push_back( symbol );
+	} else {
+		arrayOfSymbolPtrs.insert( arrayOfSymbolPtrs.begin() + index, symbol );
+	}
 	height = max( height, symbol->GetHeight( simpleSymbolHeight ) );
 	baselineOffset = max( baselineOffset, symbol->GetBaselineOffset( simpleSymbolHeight ) );
 }

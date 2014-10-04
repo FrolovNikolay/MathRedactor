@@ -51,7 +51,7 @@ void CEditWindow::Show( int nCmdShow )
 
 void CEditWindow::AddSymbol( CSymbol* symbol )
 {
-	content.back().Push( symbol );
+	caret.GetLine()->Push( symbol, caret.GetIndex() );
 	caret.Move( DRight );
 	::RedrawWindow( windowHandle, 0, 0, RDW_INVALIDATE | RDW_ERASE );
 }
@@ -315,6 +315,16 @@ CEditWindow::CCaret::CCaret( CEditWindow* _window )
 	shown = false;
 	height = window->simpleSymbolHeight;
 	width = 2;
+}
+
+CLineOfSymbols* CEditWindow::CCaret::GetLine()
+{
+	return line;
+}
+
+int CEditWindow::CCaret::GetIndex() const
+{
+	return index;
 }
 
 void CEditWindow::CCaret::Create()

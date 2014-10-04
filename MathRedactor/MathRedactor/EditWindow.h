@@ -78,6 +78,10 @@ private:
 	public:
 		CCaret( CEditWindow* );
 
+		CLineOfSymbols* GetLine();
+		int GetIndex() const;
+
+		// видит ли пользователь каретку в данный момент
 		bool IsShown() const;
 
 		void Create();
