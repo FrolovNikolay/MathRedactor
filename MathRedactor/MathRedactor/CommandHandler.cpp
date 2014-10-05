@@ -2,6 +2,7 @@
 
 #include "FractionSymbol.h"
 #include "SimpleSymbol.h"
+#include "SigmaSymbol.h"
 #include "CommandHandler.h"
 #include "RibbonIDs.h"
 
@@ -46,13 +47,13 @@ STDMETHODIMP CCommandHandler::Execute( UINT nCmdId, UI_EXECUTIONVERB verb, const
 {
 	switch( nCmdId ) {
 	case ID_CMD_SIGMA:
-		editWindow->AddSign( L'/' );
-		editWindow->AddSign( L's' );
-		editWindow->AddSign( L'i' );
-		editWindow->AddSign( L'g' );
-		editWindow->AddSign( L'm' );
-		editWindow->AddSign( L'a' );
+	{
+		CSigmaSymbol* sigma = new CSigmaSymbol( editWindow->GetSimpleSymbolHeight() );
+		sigma->GetUpperLine().Push( new CSimpleSymbol( L'9' ), 0 );
+		sigma->GetLowerLine().Push( new CSimpleSymbol( L'1' ), 0 );
+		editWindow->AddSymbol( sigma );
 		break;
+	}
 	case ID_CMD_FRACTION:
 		CFractionSymbol* fraction = new CFractionSymbol( editWindow->GetSimpleSymbolHeight() );
 		fraction->GetUpperLine().Push( new CSimpleSymbol( L'1' ), 0 );

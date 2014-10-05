@@ -174,7 +174,7 @@ void CEditWindow::OnWmPaint( )
 
 	//!!!Сделать настройку шрифта отдельно
 	HFONT font = ::CreateFont( simpleSymbolHeight, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_DEFAULT_PRECIS,
-		CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"Arial" );
+		CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"Georgia" );
 	assert( font != 0 );
 
 	if( symbolSelector.HasSelection() ) {
