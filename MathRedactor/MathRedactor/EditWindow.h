@@ -136,4 +136,5 @@ private:
 	static LRESULT __stdcall windowProcedure( HWND, UINT, WPARAM, LPARAM );
 
 	bool isSymbolAllowed( wchar_t ) const;
+	int getBaseLineIndex( const CLineOfSymbols* ) const;
 };

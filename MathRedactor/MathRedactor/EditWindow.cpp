@@ -394,6 +394,28 @@ LRESULT __stdcall CEditWindow::windowProcedure( HWND windowHandle, UINT message,
 	return ::DefWindowProc( windowHandle, message, wParam, lParam );
 }
 
+// проверяет, допустим ли данный символ
+bool CEditWindow::isSymbolAllowed( wchar_t symbol ) const
+{
+	std::wstring allowedOperators = L"+-/*=^~";
+	return ( allowedOperators.find( symbol ) != std::wstring::npos || symbol == L' ' || ( symbol >= '0' && symbol <= '9' ) ||
+		( symbol >= 'a'  &&  symbol <= 'z' ) || ( symbol >= 'A'  &&  symbol <= 'Z' ) );
+}
+
+// проверка, является CLineOFSYmbols одной из основных строк редактора
+// если является - вернет индекс
+// если нет - вернет -1
+int CEditWindow::getBaseLineIndex( const CLineOfSymbols* line ) const
+{
+	for( int i = 0; i < content.size(); ++i ) {
+		if( line == &content[i] ) {
+			return i;
+		}
+	}
+
+	return -1;
+}
+
 // класс CCaret
 
 CEditWindow::CCaret::CCaret( CEditWindow* _window )
@@ -494,14 +516,25 @@ void CEditWindow::CCaret::moveLeft()
 	if( index > 0 ) {
 		--index;
 		moveToNewCoordinates();
+	} else if( window->getBaseLineIndex( line ) > 0 ) {
+		int lineIndex = window->getBaseLineIndex( line ) - 1;
+		line = &( window->content[lineIndex] );
+		index = line->Length();
+		moveToNewCoordinates();
 	}
+
 }
 
 // сдвигает каретку на единицу в право
 void CEditWindow::CCaret::moveRight()
 {
+	int lineIndex = window->getBaseLineIndex( line );
 	if( line->Length() > index ) {
 		++index;
+		moveToNewCoordinates();
+	} else if( lineIndex >= 0 && lineIndex + 1 < window->content.size() ) {
+		line = &( window->content[lineIndex + 1] );
+		index = 0;
 		moveToNewCoordinates();
 	}
 }
@@ -539,12 +572,4 @@ void CEditWindow::CCaret::changeHeight( int newHeight )
 	if( wasShown ) {
 		Show();
 	}
-}
-
-// проверяет, допустим ли данный символ
-bool CEditWindow::isSymbolAllowed( wchar_t symbol ) const
-{
-	std::wstring allowedOperators = L"+-/*=^~";
-	return ( allowedOperators.find(symbol) != std::wstring::npos || symbol == L' ' || ( symbol >= '0' && symbol <= '9' ) ||
-		( symbol >= 'a'  &&  symbol <= 'z' ) || ( symbol >= 'A'  &&  symbol <= 'Z' ) );
 }
