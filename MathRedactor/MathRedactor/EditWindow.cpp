@@ -2,6 +2,7 @@
 #include "SimpleSymbol.h"
 #include "FractionSymbol.h"
 #include <assert.h>
+#include <windowsx.h>
 
 // класс CEditWindow
 // константы
@@ -10,7 +11,8 @@ const wchar_t* CEditWindow::className = L"MathRedactorEditWindowClass";
 
 // public методы
 
-CEditWindow::CEditWindow() : horizontalScrollUnit( 30 ), verticalScrollUnit( 15 ), simpleSymbolHeight( 50 ), caret( this )
+CEditWindow::CEditWindow() : horizontalScrollUnit( 30 ), verticalScrollUnit( 15 ), simpleSymbolHeight( 50 ),
+		caret( this ), symbolSelector( content )
 {
 	windowHandle = 0;
 	
@@ -106,7 +108,29 @@ void CEditWindow::MoveCaret( CEditWindow::TDirection direction )
 
 void CEditWindow::MoveCaretTo( int x, int y )
 {
-	// TODO
+	int currentY = 0;
+	int line = 0;
+	for( line = 0; line < content.size(); ++line ) {
+		currentY += content[line].GetHeight();
+		if( currentY > y ) {
+			break;
+		}
+	}
+	if( content.size() == line ) {
+		return;
+	}
+	int currentX = 0;
+	int symbolIdx = 0;
+	for( symbolIdx = 0; symbolIdx < content[line].Length(); ++symbolIdx ) {
+		currentX += content[line][symbolIdx]->GetWidth();
+		if( currentX > x ) {
+			break;
+		} 
+	}
+	if( symbolIdx == content[line].Length() ) {
+		--symbolIdx;
+	}
+	caret.MoveTo( &content[line], symbolIdx );
 }
 
 // protected методы
@@ -134,11 +158,18 @@ void CEditWindow::OnWmPaint( )
 	RECT clientRect;
 	::GetClientRect( windowHandle, &clientRect );
 
+	int width = clientRect.right;
+	int height = clientRect.bottom;
+
+	HDC memDC = CreateCompatibleDC( displayHandle );
+	HBITMAP bitmap = CreateCompatibleBitmap( displayHandle, width, height );
+	HBITMAP oldBitmap = reinterpret_cast<HBITMAP>( ::SelectObject( memDC, bitmap ) );
+
 	//Фон
 	HBRUSH bgBrush = ::CreateSolidBrush( RGB( 255, 255, 255 ) );
-	HBRUSH oldBgBrush = (HBRUSH) ::SelectObject( displayHandle, bgBrush );
-	::Rectangle( displayHandle, 0, 0, clientRect.right, clientRect.bottom );
-	::SelectObject( displayHandle, oldBgBrush );
+	HBRUSH oldBgBrush = (HBRUSH) ::SelectObject( memDC, bgBrush );
+	::Rectangle( memDC, 0, 0, width, height );
+	::SelectObject( memDC, oldBgBrush );
 	::DeleteObject( bgBrush );
 
 	//!!!Сделать настройку шрифта отдельно
@@ -146,26 +177,38 @@ void CEditWindow::OnWmPaint( )
 		CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"Arial" );
 	assert( font != 0 );
 
-	HFONT oldFont = (HFONT) ::SelectObject( displayHandle, font );
+	if( symbolSelector.HasSelection() ) {
+		symbolSelector.MakeSelection( memDC, width, height );
+	}
+
+	HFONT oldFont = (HFONT) ::SelectObject( memDC, font );
 
 	//Настройка кисти для линии (рисование дроби)
 	HPEN linePen = ::CreatePen( PS_SOLID, 1, RGB( 0, 0, 0 ) );
-	HPEN oldLinePen = (HPEN) ::SelectObject( displayHandle, linePen );
+	HPEN oldLinePen = (HPEN) ::SelectObject( memDC, linePen );
 
 	//Выравнивание для TextOut (левый верхний угол)
-	::SetTextAlign( displayHandle, TA_LEFT | TA_TOP );
+	::SetTextAlign( memDC, TA_LEFT | TA_TOP );
+	// Фон текста прозрачный, для выделения
+	::SetBkMode( memDC, TRANSPARENT );
 
-
-	for( int i = 0; i < content.size(); ++i ) {
-		content[i].Draw( displayHandle, posX, posY );
+	for( int i = 0; i < content.size( ); ++i ) {
+		content[i].Draw( memDC, posX, posY );
 		posY += content[i].GetHeight();
 	}
 
-	::SelectObject( displayHandle, oldLinePen );
+	::SelectObject( memDC, oldLinePen );
 	::DeleteObject( linePen );
 
-	::SelectObject( displayHandle, oldFont );
+	::SelectObject( memDC, oldFont );
 	::DeleteObject( font );
+	
+	::SetBkMode( memDC, OPAQUE );
+
+	::BitBlt( displayHandle, 0, 0, width, height, memDC, 0, 0, SRCCOPY);
+	::DeleteObject( oldBitmap );
+	::DeleteObject( bitmap );
+	::DeleteDC( memDC );
 
 	::EndPaint( windowHandle, &paintInfo );
 	// если каретка показывалась до перерисовки, то отображаем ее
@@ -273,6 +316,41 @@ void CEditWindow::OnWmSize( LPARAM lParam )
 	::SetScrollInfo( windowHandle, SB_VERT, &scrollInfo, TRUE );
 }
 
+void CEditWindow::OnLButDown( LPARAM lParam )
+{
+	int x = GET_X_LPARAM( lParam );
+	int y = GET_Y_LPARAM( lParam );
+
+	symbolSelector.ResetSelection();
+	MoveCaretTo( x, y );
+	if( !caret.IsShown() ) {
+		ShowCaret();
+	}
+	symbolSelector.SetStartPosition( x, y );
+}
+
+void CEditWindow::OnLButUp( LPARAM lParam )
+{
+	int x = GET_X_LPARAM( lParam );
+	int y = GET_Y_LPARAM( lParam );
+
+	if( symbolSelector.HasSelection() ) {
+		symbolSelector.SetCurrentPosition( x, y );
+	} else {
+		MoveCaretTo( x, y );
+	}
+	
+	InvalidateRect( windowHandle, 0, true );
+}
+
+void CEditWindow::OnLockedMouseMove( LPARAM lParam )
+{
+	HideCaret();
+	symbolSelector.SetCurrentPosition( GET_X_LPARAM( lParam ), GET_Y_LPARAM( lParam ) );
+	InvalidateRect( windowHandle, 0, true );
+
+}
+
 // private методы
 
 // процедура обрабатывающая сообщения для окна редактора
@@ -299,6 +377,17 @@ LRESULT __stdcall CEditWindow::windowProcedure( HWND windowHandle, UINT message,
 		break;
 	case WM_SIZE:
 		window->OnWmSize( lParam );
+		break;
+	case WM_LBUTTONDOWN:
+		window->OnLButDown( lParam );
+		break;
+	case WM_MOUSEMOVE:
+		if( wParam & MK_LBUTTON ) {
+			window->OnLockedMouseMove( lParam );
+		}
+		break;
+	case WM_LBUTTONUP:
+		window->OnLButUp( lParam );
 		break;
 	}
 

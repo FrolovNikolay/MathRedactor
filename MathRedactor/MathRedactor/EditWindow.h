@@ -6,6 +6,7 @@
 #include <Windows.h>
 #include <vector>
 #include "LineOfSymbols.h"
+#include "ItemSelector.h"
 
 class CEditWindow {
 public:
@@ -56,6 +57,12 @@ protected:
 	// обработка изменения размера окна
 	// пересчитывает некоторые свойства скроллов
 	void OnWmSize( LPARAM );
+	// метод, вызываемый при получении окном сообщения WM_LBUTTONDOWN
+	void OnLButDown( LPARAM );
+	// метод, вызываемый при получении окном сообщения WM_LBUTTONUP
+	void OnLButUp( LPARAM );
+	// метод, вызываемый при получении окном сообщения WM_MOUSEMOVE
+	void OnLockedMouseMove( LPARAM );
 
 private:
 	// хэндл окна, которому соответствует этот объект класса.
@@ -72,6 +79,9 @@ private:
 	// для скроллирования
 	const int horizontalScrollUnit;
 	const int verticalScrollUnit;
+
+	// связанный с окном механизм для выделения
+	CItemSelector symbolSelector;
 	
 	// Класс каретки для этого типа окна
 	class CCaret {
