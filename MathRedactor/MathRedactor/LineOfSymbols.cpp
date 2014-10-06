@@ -43,6 +43,12 @@ void CLineOfSymbols::Push( CSymbol* symbol, int index )
 	baselineOffset = max( baselineOffset, symbol->GetBaselineOffset( simpleSymbolHeight ) );
 }
 
+void CLineOfSymbols::Pop( int index )
+{
+	delete( arrayOfSymbolPtrs[index] );
+	arrayOfSymbolPtrs.erase( arrayOfSymbolPtrs.begin() + index );
+}
+
 void CLineOfSymbols::Draw( HDC displayHandle, int posX, int posY ) const
 {
 

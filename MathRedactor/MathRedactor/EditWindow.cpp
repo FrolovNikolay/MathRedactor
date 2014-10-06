@@ -67,26 +67,39 @@ void CEditWindow::AddSign( wchar_t sign )
 
 void CEditWindow::RemoveSign()
 {
-	if( content.size() == 0 ) {
-		return;
-	}
-	if( content.back().Length() == 0 ) {
-		if( content.size() != 1 ) {
-			content.pop_back();
-			caret.MoveTo( &content.back(), content.back().Length() );
-		}
-	} else {
-		content.back().Pop();
+	if( caret.GetIndex() > 0 ) {
+		caret.GetLine()->Pop( caret.GetIndex() - 1 );
 		caret.Move( DLeft );
+	} else if( getBaseLineIndex( caret.GetLine() ) > 0 ) {
+		int lineIndex = getBaseLineIndex( caret.GetLine() );
+		int pos = content[lineIndex - 1].Length();
+		for( int i = 0; i < content[lineIndex].Length(); ++i ) {
+			content[lineIndex - 1].Push( content[lineIndex][i]->Clone(), content[lineIndex - 1].Length() );
+		}
+		content.erase( content.begin() + lineIndex );
+		caret.MoveTo( &content[lineIndex - 1], pos );
 	}
 	::RedrawWindow( windowHandle, 0, 0, RDW_INVALIDATE );
 }
 
 void CEditWindow::NewLine()
 {
-	content.push_back( CLineOfSymbols( simpleSymbolHeight ) );
-	caret.MoveTo( &content.back(), 0 );
-	::RedrawWindow( windowHandle, 0, 0, RDW_INVALIDATE );
+	int lineIndex = getBaseLineIndex( caret.GetLine() );
+	if( lineIndex != -1 ) {
+		if( lineIndex == content.size() - 1 ) {
+			content.push_back( CLineOfSymbols( simpleSymbolHeight ) );
+		} else {
+			content.insert( content.begin() + lineIndex + 1, 1, CLineOfSymbols( simpleSymbolHeight ) );
+		}
+		for( int i = caret.GetIndex(); i < content[lineIndex].Length(); ++i ) {
+			content[lineIndex + 1].Push( content[lineIndex][i]->Clone(), i - caret.GetIndex() );
+		}
+		for( int i = content[lineIndex].Length() - 1; i >= caret.GetIndex(); --i ) {
+			content[lineIndex].Pop( i );
+		}
+		caret.MoveTo( &content[lineIndex + 1], 0 );
+		::RedrawWindow( windowHandle, 0, 0, RDW_INVALIDATE );
+	}
 }
 
 void CEditWindow::ShowCaret()
@@ -126,9 +139,6 @@ void CEditWindow::MoveCaretTo( int x, int y )
 		if( currentX > x ) {
 			break;
 		} 
-	}
-	if( symbolIdx == content[line].Length() ) {
-		--symbolIdx;
 	}
 	caret.MoveTo( &content[line], symbolIdx );
 }

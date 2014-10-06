@@ -28,8 +28,8 @@ public:
 	// Добавление символа в позицию index
 	// Если index лежит за пределами строки то добавляет в конец строки
 	void CLineOfSymbols::Push( CSymbol* symbol, int index );
-	//Убирает символ из конца строки
-	void Pop( ) { delete arrayOfSymbolPtrs.back(); arrayOfSymbolPtrs.pop_back(); recalculate(); }
+	//Убирает символ с текущей позиции
+	void Pop( int index );
 	//Возвращает длину строки
 	int Length( ) const { return static_cast<int>(arrayOfSymbolPtrs.size( )); }
 
