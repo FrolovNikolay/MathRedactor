@@ -1,6 +1,10 @@
 ﻿#include "EditWindow.h"
 #include "SimpleSymbol.h"
 #include "FractionSymbol.h"
+#include "SigmaSymbol.h"
+#include "IndexSymbol.h"
+#include <typeinfo>
+#include "instruments.h"
 #include <assert.h>
 #include <windowsx.h>
 
@@ -60,9 +64,17 @@ void CEditWindow::AddSymbol( CSymbol* symbol )
 
 void CEditWindow::AddSign( wchar_t sign )
 {
+	if( symbolSelector.HasSelection() ) {
+		removeSelectedSymbols();
+		symbolSelector.ResetSelection();
+		if( !caret.IsShown() ) {
+			ShowCaret();
+		}
+	}
 	if( isSymbolAllowed( sign ) ) {
 		AddSymbol( new CSimpleSymbol( sign ) );
 	}
+	InvalidateRect( windowHandle, 0, true );
 }
 
 void CEditWindow::RemoveSign()
@@ -121,26 +133,51 @@ void CEditWindow::MoveCaret( CEditWindow::TDirection direction )
 
 void CEditWindow::MoveCaretTo( int x, int y )
 {
+	int lineIdx = 0;
+	int symbolIdx = 0;
+
 	int currentY = 0;
-	int line = 0;
-	for( line = 0; line < content.size(); ++line ) {
-		currentY += content[line].GetHeight();
-		if( currentY > y ) {
+	for( lineIdx = 0; lineIdx < content.size(); ++lineIdx ) {
+		currentY += content[lineIdx].GetHeight();
+		if( currentY >= y ) {
 			break;
 		}
 	}
-	if( content.size() == line ) {
+	if( currentY < y ) {
 		return;
 	}
 	int currentX = 0;
-	int symbolIdx = 0;
-	for( symbolIdx = 0; symbolIdx < content[line].Length(); ++symbolIdx ) {
-		currentX += content[line][symbolIdx]->GetWidth();
-		if( currentX > x ) {
+	for( symbolIdx = 0; symbolIdx < content[lineIdx].Length(); ++symbolIdx ) {
+		currentX += content[lineIdx][symbolIdx]->GetWidth();
+		if( currentX >= x ) {
 			break;
 		} 
 	}
-	caret.MoveTo( &content[line], symbolIdx );
+	if( currentX < x ) {
+		++lineIdx ;
+		symbolIdx = -1;
+	}
+
+	CLineOfSymbols* baseLine;
+
+	// Если выделение начинается за границей существующих строк / символов в строке, то выделяем по всему документу
+	if( lineIdx == content.size() ) {
+		baseLine = &content[--lineIdx];
+	} else {
+		baseLine = isLineBase( content[lineIdx], x, y );
+	}
+	if( baseLine->Length() == 0 ) {
+		symbolIdx = -1;
+	} else {
+		currentX = 0;
+		for( symbolIdx = 0; symbolIdx < baseLine->Length(); ++symbolIdx ) {
+			currentX += (*baseLine)[symbolIdx]->GetWidth();
+			if( currentX > x ) {
+				break;
+			}
+		}
+	}
+	caret.MoveTo( baseLine, symbolIdx );
 }
 
 // protected методы
@@ -358,7 +395,6 @@ void CEditWindow::OnLockedMouseMove( LPARAM lParam )
 	HideCaret();
 	symbolSelector.SetCurrentPosition( GET_X_LPARAM( lParam ), GET_Y_LPARAM( lParam ) );
 	InvalidateRect( windowHandle, 0, true );
-
 }
 
 // private методы
@@ -402,6 +438,92 @@ LRESULT __stdcall CEditWindow::windowProcedure( HWND windowHandle, UINT message,
 	}
 
 	return ::DefWindowProc( windowHandle, message, wParam, lParam );
+}
+
+CLineOfSymbols* CEditWindow::isLineBase( CLineOfSymbols& currentBaseLine, int x, int y )
+{
+	// находим символ, в котором может оказаться очередная подстрока
+	int currentX = 0;
+	int symbolIdx = 0;
+	for( ; symbolIdx < currentBaseLine.Length(); ++symbolIdx ) {
+		currentX += currentBaseLine[symbolIdx]->GetWidth();
+		if( currentX >= x ) {
+			break;
+		}
+	}
+	// если символ простой или мы ушли за границу строки, то текущая линия уже является стартовой для выделения
+	if( currentX < x || typeid( *currentBaseLine[symbolIdx] ) == typeid( CSimpleSymbol ) ) {
+		return &currentBaseLine;
+	// иначе в зависимости от типа символа смотрим, не нужно ли перейти на одну из "более внутренних" строк
+	} else if( typeid( *currentBaseLine[symbolIdx] ) == typeid( CFractionSymbol ) ) {
+		CFractionSymbol* tmp = dynamic_cast<CFractionSymbol*>( currentBaseLine[symbolIdx] );
+		if( isLineContainPoint( tmp->GetUpperLine(), x, y ) ) {
+			isLineBase( tmp->GetUpperLine(), x, y );
+		} else if( isLineContainPoint( tmp->GetLowerLine(), x, y ) ) {
+			isLineBase( tmp->GetLowerLine(), x, y );
+		} else {
+			return &currentBaseLine;
+		}
+	} else if( typeid( *currentBaseLine[symbolIdx] ) == typeid( CIndexSymbol ) ) {
+		CIndexSymbol* tmp = dynamic_cast<CIndexSymbol*>( currentBaseLine[symbolIdx] );
+		if( isLineContainPoint( tmp->GetLine(), x, y ) ) {
+			isLineBase( tmp->GetLine(), x, y );
+		} else {
+			return &currentBaseLine;
+		}
+	} else if( typeid( *currentBaseLine[symbolIdx] ) == typeid( CSigmaSymbol ) ) {
+		CSigmaSymbol* tmp = dynamic_cast<CSigmaSymbol*>( currentBaseLine[symbolIdx] );
+		if( isLineContainPoint( tmp->GetUpperLine(), x, y ) ) {
+			isLineBase( tmp->GetUpperLine(), x, y );
+		} else if( isLineContainPoint( tmp->GetLowerLine(), x, y ) ) {
+			isLineBase( tmp->GetLowerLine(), x, y );
+		} else {
+			return &currentBaseLine;
+		}
+	// неопознанный символ - не можем попасть в его подстроки - останавливаемся.
+	} else {
+		return &currentBaseLine;
+	}
+}
+
+void CEditWindow::removeSelectedSymbols()
+{
+	if( symbolSelector.IsGlobalSelection() ) {
+		int startLine, startSymbol;
+		int lastLine, lastSymbol;
+		symbolSelector.GetGlobalSelectionInfo( startLine, startSymbol, lastLine, lastSymbol );
+		if( startLine == content.size() ) {
+			caret.MoveTo( &content[content.size() - 1], content[content.size() - 1].Length() - 1 );
+			return;
+		}
+		if( lastLine == content.size() ) {
+			--lastLine;
+			lastSymbol = content[lastLine].Length() - 1;
+		}
+		if( startLine == lastLine ) {
+			for( int i = startSymbol; i <= lastSymbol; ++i ) {
+				content[startLine].Pop( startSymbol );
+			}
+		} else {
+			int length = content[startLine].Length();
+			for( int i = startSymbol; i < length; ++i ) {
+				content[startLine].Pop( startSymbol );
+			}
+			for( int i = lastSymbol + 1; i < content[lastLine].Length(); ++i ) {
+				content[startLine].Push( content[lastLine][i]->Clone(), startSymbol + i );
+			}
+			content.erase( content.begin() + startLine + 1, content.begin() + lastLine + 1 );
+		}
+		caret.MoveTo( &content[startLine], startSymbol );
+	} else {
+		CLineOfSymbols* baseLine;
+		int startSymbol, lastSymbol;
+		symbolSelector.GetLocalSelectionInfo( baseLine, startSymbol, lastSymbol );
+		for( int i = 0; i <= lastSymbol - startSymbol; ++i ) {
+			baseLine->Pop( startSymbol );
+		}
+		caret.MoveTo( baseLine, startSymbol );
+	}
 }
 
 // проверяет, допустим ли данный символ

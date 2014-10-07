@@ -135,6 +135,10 @@ private:
 
 	static LRESULT __stdcall windowProcedure( HWND, UINT, WPARAM, LPARAM );
 
+	CLineOfSymbols* isLineBase( CLineOfSymbols& currentBaseLine, int x, int y );
+
+	void removeSelectedSymbols();
+
 	bool isSymbolAllowed( wchar_t ) const;
 	int getBaseLineIndex( const CLineOfSymbols* ) const;
 };

@@ -1,4 +1,4 @@
-#include "RootSymbol.h"
+п»ї#include "RootSymbol.h"
 #include <assert.h>
 #include <wingdi.h>
 #include <Windows.h>
@@ -15,14 +15,14 @@ CRootSymbol::CRootSymbol( int simpleSymbolHeight ) :
 void CRootSymbol::Draw( HDC displayHandle, int posX, int posY, int simpleSymbolHeight ) const
 {
 	int rootHeight = getRootHeight( simpleSymbolHeight );
-	//Рисуем экспоненту
+	//Р РёСЃСѓРµРј СЌРєСЃРїРѕРЅРµРЅС‚Сѓ
 	int exponentY = posY - ( ( rootHeight - simpleSymbolHeight ) +
 		( exponentLine.GetHeight() - getExponentVerticalOffset( rootHeight ) ) );
 	exponentLine.Draw( displayHandle, posX, exponentY );
 	int exponentWidth = exponentLine.CalculateWidth( displayHandle );
 
-	//Рисуем знак корня
-	//Устанавливаем шрифт для корня
+	//Р РёСЃСѓРµРј Р·РЅР°Рє РєРѕСЂРЅСЏ
+	//РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј С€СЂРёС„С‚ РґР»СЏ РєРѕСЂРЅСЏ
 	HFONT oldFont = ( HFONT )::GetCurrentObject( displayHandle, OBJ_FONT );
 	assert( oldFont != 0 );
 
@@ -39,32 +39,32 @@ void CRootSymbol::Draw( HDC displayHandle, int posX, int posY, int simpleSymbolH
 	TEXTMETRIC textMetric;
 	::GetTextMetrics( displayHandle, &textMetric );
 
-	//Ширина символа корня
+	//РЁРёСЂРёРЅР° СЃРёРјРІРѕР»Р° РєРѕСЂРЅСЏ
 	int rootWidth = fontSizeStruct.cx;
 
-	//Вычисляем координаты для сигмы и рисуем её
+	//Р’С‹С‡РёСЃР»СЏРµРј РєРѕРѕСЂРґРёРЅР°С‚С‹ РґР»СЏ СЃРёРіРјС‹ Рё СЂРёСЃСѓРµРј РµС‘
 	int rootX = posX + exponentWidth + getExponentOffset( rootWidth );
 	rootX = max( posX, rootX );
 	int rootY = posY - ( rootHeight - simpleSymbolHeight );
 	::TextOut( displayHandle, rootX, rootY, symbol, 1 );
 
-	//Возвращаем старый шрифт, удаляем созданный
+	//Р’РѕР·РІСЂР°С‰Р°РµРј СЃС‚Р°СЂС‹Р№ С€СЂРёС„С‚, СѓРґР°Р»СЏРµРј СЃРѕР·РґР°РЅРЅС‹Р№
 	::SelectObject( displayHandle, oldFont );
 	::DeleteObject( font );
 
-	//Рисуем подкоренное выражение
+	//Р РёСЃСѓРµРј РїРѕРґРєРѕСЂРµРЅРЅРѕРµ РІС‹СЂР°Р¶РµРЅРёРµ
 	int radicandX = rootX + rootWidth;
 	int radicandY = posY;
 	radicandLine.Draw( displayHandle, radicandX, radicandY );
 	int radicandWidth = radicandLine.CalculateWidth( displayHandle );
 
-	//Рисуем линию
+	//Р РёСЃСѓРµРј Р»РёРЅРёСЋ
 	int strokeStartX = radicandX;
 	int strokeStartY = rootY + textMetric.tmInternalLeading / 2;
 	::MoveToEx( displayHandle, strokeStartX, strokeStartY, NULL );
 	::LineTo( displayHandle, strokeStartX + radicandWidth, strokeStartY );
 
-	//Обновляем информацию
+	//РћР±РЅРѕРІР»СЏРµРј РёРЅС„РѕСЂРјР°С†РёСЋ
 	x = posX;
 	y = exponentY;
 	width = exponentWidth + rootWidth + getExponentOffset( rootWidth ) + radicandWidth;
@@ -91,10 +91,10 @@ int CRootSymbol::CalculateWidth( HDC displayHandle ) const
 	SIZE fontSizeStruct;
 	::GetTextExtentPoint32( displayHandle, symbol, 1, &fontSizeStruct );
 
-	//Ширина символа корня
+	//РЁРёСЂРёРЅР° СЃРёРјРІРѕР»Р° РєРѕСЂРЅСЏ
 	int rootWidth = fontSizeStruct.cx;
 
-	//Возвращаем старый шрифт, удаляем созданный
+	//Р’РѕР·РІСЂР°С‰Р°РµРј СЃС‚Р°СЂС‹Р№ С€СЂРёС„С‚, СѓРґР°Р»СЏРµРј СЃРѕР·РґР°РЅРЅС‹Р№
 	::SelectObject( displayHandle, oldFont );
 	::DeleteObject( font );
 

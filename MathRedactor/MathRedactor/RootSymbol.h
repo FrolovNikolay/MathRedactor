@@ -1,17 +1,17 @@
-//Автор: Давлетшин Азат
+п»ї//РђРІС‚РѕСЂ: Р”Р°РІР»РµС‚С€РёРЅ РђР·Р°С‚
 
 #pragma once
 
 #include "Symbol.h"
 #include "LineOfSymbols.h" 
 
-//Сложный символ "корень". Состоит из двух строк (степень и подкоренное выражение)
+//РЎР»РѕР¶РЅС‹Р№ СЃРёРјРІРѕР» "РєРѕСЂРµРЅСЊ". РЎРѕСЃС‚РѕРёС‚ РёР· РґРІСѓС… СЃС‚СЂРѕРє (СЃС‚РµРїРµРЅСЊ Рё РїРѕРґРєРѕСЂРµРЅРЅРѕРµ РІС‹СЂР°Р¶РµРЅРёРµ)
 class CRootSymbol : public CSymbol {
 public:
 
 	CRootSymbol( int simpleSymbolHeight );
 
-	//Создание копии (deep) объекта. 
+	//РЎРѕР·РґР°РЅРёРµ РєРѕРїРёРё (deep) РѕР±СЉРµРєС‚Р°. 
 	virtual CSymbol* Clone( ) const { return new CRootSymbol( *this ); }
 
 	virtual int GetHeight( int simpleSymbolHeight ) const;
@@ -22,27 +22,27 @@ public:
 	CLineOfSymbols& GetRadicandLine( ) { return radicandLine; }
 	const CLineOfSymbols& GetRadicandLine( ) const { return radicandLine; }
 
-	//Описание этих методов находится в Symbol.h
+	//РћРїРёСЃР°РЅРёРµ СЌС‚РёС… РјРµС‚РѕРґРѕРІ РЅР°С…РѕРґРёС‚СЃСЏ РІ Symbol.h
 	virtual void Draw( HDC displayHandle, int posX, int posY, int simpleSymbolHeight ) const;
 	virtual int CalculateWidth( HDC displayHandle ) const;
 
 private:
-	//Строки степень и подкоренное выражение
+	//РЎС‚СЂРѕРєРё СЃС‚РµРїРµРЅСЊ Рё РїРѕРґРєРѕСЂРµРЅРЅРѕРµ РІС‹СЂР°Р¶РµРЅРёРµ
 	CLineOfSymbols exponentLine;
 	CLineOfSymbols radicandLine;
 
-	//Символ корня для TextOut
+	//РЎРёРјРІРѕР» РєРѕСЂРЅСЏ РґР»СЏ TextOut
 	static const wchar_t symbol[];
 
-	//Рассчитать высоту строки степени
+	//Р Р°СЃСЃС‡РёС‚Р°С‚СЊ РІС‹СЃРѕС‚Сѓ СЃС‚СЂРѕРєРё СЃС‚РµРїРµРЅРё
 	static int getExponentHeight( int simpleSymbolHeight )
 		{ return static_cast<int>( simpleSymbolHeight * 0.5 ); }
-	//Высота юникодного символа корня
+	//Р’С‹СЃРѕС‚Р° СЋРЅРёРєРѕРґРЅРѕРіРѕ СЃРёРјРІРѕР»Р° РєРѕСЂРЅСЏ
 	static int getRootHeight( int simpleSymbolHeight )
 	{
 		return static_cast<int>( simpleSymbolHeight * 1.6 );
 	}
-	//Сдвиг по горизонтали показателя степени
+	//РЎРґРІРёРі РїРѕ РіРѕСЂРёР·РѕРЅС‚Р°Р»Рё РїРѕРєР°Р·Р°С‚РµР»СЏ СЃС‚РµРїРµРЅРё
 	static int getExponentOffset( int rootWidth )
 	{
 		return -static_cast<int>( rootWidth * 0.4 );

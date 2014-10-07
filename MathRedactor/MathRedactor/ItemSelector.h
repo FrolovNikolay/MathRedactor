@@ -22,6 +22,12 @@ public:
 	void MakeSelection( HDC displayHandle, int width, int height ) const;
 	// Отменить выделение
 	void ResetSelection();
+	//
+	bool IsGlobalSelection() const { return baseLine == 0; }
+	//
+	void GetGlobalSelectionInfo( int& startLine, int& startSymbol, int& lastLine, int& lastSymbol ) const;
+	//
+	void GetLocalSelectionInfo( CLineOfSymbols*& baseLine, int& startSymbol, int& lastSymbol );
 
 private:
 	// содержимое окна
@@ -29,16 +35,20 @@ private:
 	// координаты начала выделения
 	int startX, startY;
 	// координаты конца выделения
-	int currentX, currentY;
-	// попадает ли старт выделения в одну из основных линий
-	bool isLineMain;
+	int endX, endY;
 	// если линия не одна из основных, то сюда попадет подлиния
 	const CLineOfSymbols* baseLine;
 
 	CItemSelector();
 
-	void getItemInfo( HDC displayHandle, int x, int y, int& line, int& symbolIdx ) const;
+	void findBaseLine( int x, int y );
+
+	void isLineBase( const CLineOfSymbols& currentBaseLine, int x, int y );
+
+	void getItemInfo( int x, int y, int& line, int& symbolIdx ) const;
 
 	void drawSelection( HDC displayHandle, int width, int height, int leftTopX, int leftTopY, int firstLineHeight,
 		int rightBotX, int RightBotY, int lastLineHeight ) const;
+
+	void drawSelection( HDC displayHandle, int leftTopX, int leftTopY, int rightBotX, int rightBotY ) const;
 };

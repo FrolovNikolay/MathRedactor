@@ -68,6 +68,7 @@
     <ClCompile Include="EditWindow.cpp" />
     <ClCompile Include="FractionSymbol.cpp" />
     <ClCompile Include="IndexSymbol.cpp" />
+    <ClCompile Include="instruments.cpp" />
     <ClCompile Include="ItemSelector.cpp" />
     <ClCompile Include="LineOfSymbols.cpp" />
     <ClCompile Include="main.cpp" />
@@ -80,9 +81,11 @@
     <ClInclude Include="CommandHandler.h" />
     <ClInclude Include="EditWindow.h" />
     <ClInclude Include="FractionSymbol.h" />
+    <ClInclude Include="instruments.h" />
     <ClInclude Include="ItemSelector.h" />
     <ClInclude Include="LineOfSymbols.h" />
     <ClInclude Include="MainWindow.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="RibbonIDs.h" />
     <ClInclude Include="RootSymbol.h" />
     <ClInclude Include="SimpleSymbol.h" />
@@ -98,7 +101,10 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="Res\fraction.bmp" />
+    <Image Include="Res\lowerIndex.bmp" />
     <Image Include="Res\sigma.bmp" />
+    <Image Include="Res\sqrt.bmp" />
+    <Image Include="Res\upperIndex.bmp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="RibbonUI.bin" />

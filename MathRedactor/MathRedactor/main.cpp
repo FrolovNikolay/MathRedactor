@@ -5,7 +5,6 @@
 WPARAM MessageLoop()
 {
 	MSG message;
-
 	while( ::GetMessage( &message, 0, 0, 0 ) != 0 ) {
 		::TranslateMessage( &message );
 		::DispatchMessage( &message );

@@ -72,6 +72,7 @@ void CLineOfSymbols::Draw( HDC displayHandle, int posX, int posY ) const
 		arrayOfSymbolPtrs[i]->Draw( displayHandle, posX, posY + baselineOffset, simpleSymbolHeight );
 		posX += arrayOfSymbolPtrs[i]->CalculateWidth( displayHandle );
 	}
+	width = posX - x;
 
 	//Возвращаем старый шрифт, удаляем созданный
 	::SelectObject( displayHandle, oldFont );
