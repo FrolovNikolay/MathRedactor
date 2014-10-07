@@ -72,6 +72,7 @@
     <ClCompile Include="LineOfSymbols.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainWindow.cpp" />
+    <ClCompile Include="RootSymbol.cpp" />
     <ClCompile Include="SigmaSymbol.cpp" />
     <ClCompile Include="SimpleSymbol.cpp" />
   </ItemGroup>
@@ -83,6 +84,7 @@
     <ClInclude Include="LineOfSymbols.h" />
     <ClInclude Include="MainWindow.h" />
     <ClInclude Include="RibbonIDs.h" />
+    <ClInclude Include="RootSymbol.h" />
     <ClInclude Include="SimpleSymbol.h" />
     <ClInclude Include="Symbol.h" />
     <ClInclude Include="SigmaSymbol.h" />

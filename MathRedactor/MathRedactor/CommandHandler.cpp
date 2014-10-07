@@ -4,6 +4,7 @@
 #include "SimpleSymbol.h"
 #include "SigmaSymbol.h"
 #include "IndexSymbol.h"
+#include "RootSymbol.h"
 #include "CommandHandler.h"
 #include "RibbonIDs.h"
 
@@ -83,7 +84,10 @@ STDMETHODIMP CCommandHandler::Execute( UINT nCmdId, UI_EXECUTIONVERB verb, const
 	}
 	case ID_CMD_SQRT:
 	{
-		// TODO: add some behavior
+		CRootSymbol* root = new CRootSymbol( editWindow->GetSimpleSymbolHeight() );
+		root->GetExponentLine().Push( new CSimpleSymbol( L'2' ), 0 );
+		root->GetRadicandLine().Push( new CSimpleSymbol( L'x' ), 0 );
+		editWindow->AddSymbol( root );
 		break;
 	}
 	}
