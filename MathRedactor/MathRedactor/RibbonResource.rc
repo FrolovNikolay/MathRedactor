@@ -31,17 +31,17 @@ END
 ID_CMD_LOWER_INDEX_LargeImages_RESID    BITMAP    "Res\lowerIndex.bmp" /* LargeImages ID_CMD_LOWER_INDEX_LargeImages_RESID: (null) */
 STRINGTABLE 
 BEGIN
-    cmdTabSymbols_LabelTitle_RESID L"Label:cmdTabSymbols" /* LabelTitle cmdTabSymbols_LabelTitle_RESID: (null) */
+    cmdTabSymbols_LabelTitle_RESID L"Operations" /* LabelTitle cmdTabSymbols_LabelTitle_RESID: (null) */
 END
 
 STRINGTABLE 
 BEGIN
-    cmdGroupSetOperations_LabelTitle_RESID L"Label:cmdGroupSetOperations" /* LabelTitle cmdGroupSetOperations_LabelTitle_RESID: (null) */
+    cmdGroupSetOperations_LabelTitle_RESID L"Set Operations" /* LabelTitle cmdGroupSetOperations_LabelTitle_RESID: (null) */
 END
 
 STRINGTABLE 
 BEGIN
-    cmdGroupNumberOperations_LabelTitle_RESID L"Label:cmdGroupNumberOperations" /* LabelTitle cmdGroupNumberOperations_LabelTitle_RESID: (null) */
+    cmdGroupNumberOperations_LabelTitle_RESID L"Simple Operations" /* LabelTitle cmdGroupNumberOperations_LabelTitle_RESID: (null) */
 END
 
 STRINGTABLE 
