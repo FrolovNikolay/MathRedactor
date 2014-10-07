@@ -3,39 +3,50 @@
   <Application.Commands>
     <Command Name="cmdButtonSigma"
              Symbol="ID_CMD_SIGMA"
-             LabelTitle="sigma">
+             LabelTitle="Сумма">
       <Command.LargeImages>
         <Image>Res\sigma.bmp</Image>
       </Command.LargeImages>
     </Command>
     <Command Name="cmdButtonFraction"
              Symbol="ID_CMD_FRACTION"
-             LabelTitle="fraction">
+             LabelTitle="Дробь">
       <Command.LargeImages>
         <Image>Res\fraction.bmp</Image>
       </Command.LargeImages>
     </Command>
     <Command Name="cmdButtonUpperIndex"
              Symbol="ID_CMD_UPPER_INDEX"
-             LabelTitle="upper index">
+             LabelTitle="Верхний индекс">
       <Command.LargeImages>
         <Image>Res\upperIndex.bmp</Image>
       </Command.LargeImages>
     </Command>
     <Command Name="cmdButtonLowerIndex"
              Symbol="ID_CMD_LOWER_INDEX"
-             LabelTitle="upper index">
+             LabelTitle="Нижний индекс">
       <Command.LargeImages>
         <Image>Res\lowerIndex.bmp</Image>
       </Command.LargeImages>
     </Command>
+    <Command Name="cmdButtonSqrt"
+             Symbol="ID_CMD_SQRT"
+             LabelTitle="Корень">
+      <Command.LargeImages>
+        <Image>Res\sqrt.bmp</Image>
+      </Command.LargeImages>
+    </Command>
+    <Command Name="cmdTabSymbols" LabelTitle="Символы" />
+    <Command Name="cmdGroupSetOperations" LabelTitle="Операции над множествами" />
+    <Command Name="cmdGroupNumberOperations" LabelTitle="'Операции над числами" />
   </Application.Commands>
   <Application.Views>
     <Ribbon>
       <Ribbon.Tabs>
         <Tab CommandName="cmdTabSymbols">
-          <Group CommandName="cmdGroupSetOperations" SizeDefinition="OneButton">
+          <Group CommandName="cmdGroupSetOperations" SizeDefinition="TwoButtons">
             <Button CommandName="cmdButtonSigma" />
+            <Button CommandName="cmdButtonSqrt" />
           </Group>
           <Group CommandName="cmdGroupNumberOperations" SizeDefinition="ThreeButtons">
             <Button CommandName="cmdButtonFraction" />

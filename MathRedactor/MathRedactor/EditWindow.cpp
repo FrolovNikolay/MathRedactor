@@ -407,7 +407,7 @@ LRESULT __stdcall CEditWindow::windowProcedure( HWND windowHandle, UINT message,
 // проверяет, допустим ли данный символ
 bool CEditWindow::isSymbolAllowed( wchar_t symbol ) const
 {
-	std::wstring allowedOperators = L"+-/*=^~";
+	std::wstring allowedOperators = L"+-/*=^~()[]{}";
 	return ( allowedOperators.find( symbol ) != std::wstring::npos || symbol == L' ' || ( symbol >= '0' && symbol <= '9' ) ||
 		( symbol >= 'a'  &&  symbol <= 'z' ) || ( symbol >= 'A'  &&  symbol <= 'Z' ) );
 }

@@ -17,7 +17,13 @@
 #define ID_CMD_LOWER_INDEX 5 
 #define ID_CMD_LOWER_INDEX_LabelTitle_RESID 60007
 #define ID_CMD_LOWER_INDEX_LargeImages_RESID 60008
-#define cmdTabSymbols_LabelTitle_RESID 60009
-#define cmdGroupSetOperations_LabelTitle_RESID 60010
-#define cmdGroupNumberOperations_LabelTitle_RESID 60011
-#define InternalCmd2_LabelTitle_RESID 60012
+#define ID_CMD_SQRT 6 
+#define ID_CMD_SQRT_LabelTitle_RESID 60009
+#define ID_CMD_SQRT_LargeImages_RESID 60010
+#define cmdTabSymbols 7 
+#define cmdTabSymbols_LabelTitle_RESID 60011
+#define cmdGroupSetOperations 8 
+#define cmdGroupSetOperations_LabelTitle_RESID 60012
+#define cmdGroupNumberOperations 9 
+#define cmdGroupNumberOperations_LabelTitle_RESID 60013
+#define InternalCmd2_LabelTitle_RESID 60014

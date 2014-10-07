@@ -81,6 +81,11 @@ STDMETHODIMP CCommandHandler::Execute( UINT nCmdId, UI_EXECUTIONVERB verb, const
 		editWindow->AddSymbol( upperIndex );
 		break;
 	}
+	case ID_CMD_SQRT:
+	{
+		// TODO: add some behavior
+		break;
+	}
 	}
 
 	return S_OK;
