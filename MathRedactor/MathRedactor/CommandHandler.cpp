@@ -3,6 +3,7 @@
 #include "FractionSymbol.h"
 #include "SimpleSymbol.h"
 #include "SigmaSymbol.h"
+#include "IndexSymbol.h"
 #include "CommandHandler.h"
 #include "RibbonIDs.h"
 
@@ -55,11 +56,31 @@ STDMETHODIMP CCommandHandler::Execute( UINT nCmdId, UI_EXECUTIONVERB verb, const
 		break;
 	}
 	case ID_CMD_FRACTION:
+	{
 		CFractionSymbol* fraction = new CFractionSymbol( editWindow->GetSimpleSymbolHeight() );
 		fraction->GetUpperLine().Push( new CSimpleSymbol( L'1' ), 0 );
 		fraction->GetLowerLine().Push( new CSimpleSymbol( L'2' ), 0 );
 		editWindow->AddSymbol( fraction );
 		break;
+	}
+	case ID_CMD_LOWER_INDEX:
+	{
+		CIndexSymbol* lowerIndex = new CIndexSymbol( editWindow->GetSimpleSymbolHeight(), CIndexSymbol::ITLower );
+		lowerIndex->GetLine().Push( new CSimpleSymbol( L't' ), 0 );
+		lowerIndex->GetLine().Push( new CSimpleSymbol( L'm' ), 1 );
+		lowerIndex->GetLine().Push( new CSimpleSymbol( L'p' ), 2 );
+		editWindow->AddSymbol( lowerIndex );
+		break;
+	}
+	case ID_CMD_UPPER_INDEX:
+	{
+		CIndexSymbol* upperIndex = new CIndexSymbol( editWindow->GetSimpleSymbolHeight(), CIndexSymbol::ITUpper );
+		upperIndex->GetLine().Push( new CSimpleSymbol( L't' ), 0 );
+		upperIndex->GetLine().Push( new CSimpleSymbol( L'm' ), 1 );
+		upperIndex->GetLine().Push( new CSimpleSymbol( L'p' ), 2 );
+		editWindow->AddSymbol( upperIndex );
+		break;
+	}
 	}
 
 	return S_OK;

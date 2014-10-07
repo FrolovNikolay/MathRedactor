@@ -67,6 +67,7 @@
     <ClCompile Include="CommandHandler.cpp" />
     <ClCompile Include="EditWindow.cpp" />
     <ClCompile Include="FractionSymbol.cpp" />
+    <ClCompile Include="IndexSymbol.cpp" />
     <ClCompile Include="ItemSelector.cpp" />
     <ClCompile Include="LineOfSymbols.cpp" />
     <ClCompile Include="main.cpp" />
@@ -85,6 +86,7 @@
     <ClInclude Include="SimpleSymbol.h" />
     <ClInclude Include="Symbol.h" />
     <ClInclude Include="SigmaSymbol.h" />
+    <ClInclude Include="IndexSymbol.h" />
   </ItemGroup>
   <ItemGroup>
     <Xml Include="RibbonMarkup.xml" />

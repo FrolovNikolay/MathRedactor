@@ -37,4 +37,5 @@ private:
 	int getStrokeHeight( ) const { return 1; }
 	//ƒобавка к ширине линии (добавл€етс€ с каждой стороны)
 	int getStrokeAddition( ) const { return 1; }
+	int getSymbolBorder( ) const { return 1; }
 };

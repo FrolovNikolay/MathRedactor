@@ -19,6 +19,18 @@ END
 ID_CMD_FRACTION_LargeImages_RESID    BITMAP    "Res\fraction.bmp" /* LargeImages ID_CMD_FRACTION_LargeImages_RESID: (null) */
 STRINGTABLE 
 BEGIN
+    ID_CMD_UPPER_INDEX_LabelTitle_RESID L"upper index" /* LabelTitle ID_CMD_UPPER_INDEX_LabelTitle_RESID: (null) */
+END
+
+ID_CMD_UPPER_INDEX_LargeImages_RESID    BITMAP    "Res\upperIndex.bmp" /* LargeImages ID_CMD_UPPER_INDEX_LargeImages_RESID: (null) */
+STRINGTABLE 
+BEGIN
+    ID_CMD_LOWER_INDEX_LabelTitle_RESID L"upper index" /* LabelTitle ID_CMD_LOWER_INDEX_LabelTitle_RESID: (null) */
+END
+
+ID_CMD_LOWER_INDEX_LargeImages_RESID    BITMAP    "Res\lowerIndex.bmp" /* LargeImages ID_CMD_LOWER_INDEX_LargeImages_RESID: (null) */
+STRINGTABLE 
+BEGIN
     cmdTabSymbols_LabelTitle_RESID L"Label:cmdTabSymbols" /* LabelTitle cmdTabSymbols_LabelTitle_RESID: (null) */
 END
 

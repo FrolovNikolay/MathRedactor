@@ -15,6 +15,20 @@
         <Image>Res\fraction.bmp</Image>
       </Command.LargeImages>
     </Command>
+    <Command Name="cmdButtonUpperIndex"
+             Symbol="ID_CMD_UPPER_INDEX"
+             LabelTitle="upper index">
+      <Command.LargeImages>
+        <Image>Res\upperIndex.bmp</Image>
+      </Command.LargeImages>
+    </Command>
+    <Command Name="cmdButtonLowerIndex"
+             Symbol="ID_CMD_LOWER_INDEX"
+             LabelTitle="upper index">
+      <Command.LargeImages>
+        <Image>Res\lowerIndex.bmp</Image>
+      </Command.LargeImages>
+    </Command>
   </Application.Commands>
   <Application.Views>
     <Ribbon>
@@ -23,8 +37,10 @@
           <Group CommandName="cmdGroupSetOperations" SizeDefinition="OneButton">
             <Button CommandName="cmdButtonSigma" />
           </Group>
-          <Group CommandName="cmdGroupNumberOperations" SizeDefinition="OneButton">
+          <Group CommandName="cmdGroupNumberOperations" SizeDefinition="ThreeButtons">
             <Button CommandName="cmdButtonFraction" />
+            <Button CommandName="cmdButtonUpperIndex" />
+            <Button CommandName="cmdButtonLowerIndex" />
           </Group>
         </Tab>
       </Ribbon.Tabs>

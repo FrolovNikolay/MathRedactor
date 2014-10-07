@@ -14,14 +14,14 @@ void CFractionSymbol::Draw( HDC displayHandle, int posX, int posY, int simpleSym
 {
 	//Рисуем разделитель
 	int strokeStartY = posY + simpleSymbolHeight / 2;
-	::MoveToEx( displayHandle, posX, strokeStartY, NULL );
+	::MoveToEx( displayHandle, posX + getSymbolBorder( ), strokeStartY, NULL );
 	int upperWidth = upperLine.CalculateWidth( displayHandle );
 	int lowerWidth = lowerLine.CalculateWidth( displayHandle );
 	int maxWidth = max( upperWidth, lowerWidth );
 	int strokeWidth = maxWidth + 2 * getStrokeAddition( );
-	::LineTo( displayHandle, posX + strokeWidth, strokeStartY );
+	::LineTo( displayHandle, posX + getSymbolBorder( ) + strokeWidth, strokeStartY );
 
-	posX += getStrokeAddition( );
+	posX += getStrokeAddition( ) + getSymbolBorder( );
 
 	//Рисуем верхнюю линию
 	int upperStartX = posX + (maxWidth - upperWidth) / 2;
@@ -34,9 +34,9 @@ void CFractionSymbol::Draw( HDC displayHandle, int posX, int posY, int simpleSym
 	lowerLine.Draw( displayHandle, lowerStartX, lowerStartY );
 
 	//Обновление служебной информации
-	x = posX;
+	x = posX - getStrokeAddition() - getSymbolBorder();
 	y = upperStartY;
-	width = strokeWidth;
+	width = strokeWidth + 2 * getSymbolBorder( );
 	height = upperLine.GetHeight( ) + lowerLine.GetHeight( ) + getUpperOffset( ) +
 		getLowerOffset( ) + getStrokeHeight( );
 
@@ -47,7 +47,7 @@ int CFractionSymbol::CalculateWidth( HDC displayHandle ) const
 	int upperWidth = upperLine.CalculateWidth( displayHandle );
 	int lowerWidth = lowerLine.CalculateWidth( displayHandle );
 
-	width = max( upperWidth, lowerWidth ) + 2 * getStrokeAddition( );
+	width = max( upperWidth, lowerWidth ) + 2 * getStrokeAddition( ) + 2 * getSymbolBorder( );
 
 	return width;
 }
