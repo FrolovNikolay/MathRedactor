@@ -21,6 +21,7 @@ public:
 	virtual CSymbol* Clone( ) const { return new CSimpleSymbol( *this ); }
 	//У простого символа нет подстрок
 	virtual void GetSubstrings( std::vector<const CLineOfSymbols*>& substrings ) const {}
+	virtual void GetSubstrings( std::vector<CLineOfSymbols*>& substrings ) {}
 
 	wchar_t GetSymbol( ) const { return symbol[0]; }
 	void SetSymbol( wchar_t _symbol ) { symbol[0] = _symbol; }

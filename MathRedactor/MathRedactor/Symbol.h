@@ -23,6 +23,7 @@ public:
 	virtual int GetBaselineOffset( int simpleSymbolHeight ) const = 0;
 	//Получить массив указателей на подстроки (может быть пустым). Освобождать память нельзя 
 	virtual void GetSubstrings( std::vector<const CLineOfSymbols*>& substrings ) const = 0;
+	virtual void GetSubstrings( std::vector<CLineOfSymbols*>& substrings ) = 0;
 
 	//Создание копии (deep) объекта (паттерн Prototype)
 	virtual CSymbol* Clone( ) const = 0;

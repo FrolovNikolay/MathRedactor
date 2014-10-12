@@ -18,6 +18,12 @@ void CSigmaSymbol::GetSubstrings( std::vector<const CLineOfSymbols*>& substrings
 	substrings.push_back( &lowerLine );
 }
 
+void CSigmaSymbol::GetSubstrings( std::vector<CLineOfSymbols*>& substrings )
+{
+	substrings.push_back( &upperLine );
+	substrings.push_back( &lowerLine );
+}
+
 void CSigmaSymbol::Draw( HDC displayHandle, int posX, int posY, int simpleSymbolHeight ) const
 {
 	int upperWidth = upperLine.CalculateWidth( displayHandle );

@@ -22,10 +22,15 @@ public:
 	int GetHeight( ) const { return height; }
 	int GetSimpleSymbolHeight( ) const { return simpleSymbolHeight; }
 
+	//Родителя устанавливает тот, кто создает строку
+	void SetParent( CLineOfSymbols* _parent ) { parent = _parent; }
+
 	//Нарисовать строку в Device Context, начиная с позиции (startX, startY) - левый верхний угол строки.
 	void Draw( HDC displayHandle, int posX, int posY ) const;
 	//Рассчитать ширину строки (линейно по количеству символов в строке, включая символы в сложных символах)
 	int CalculateWidth( HDC displayHandle ) const;
+	//Пересчитать высоты и базовые линии
+	void Recalculate( );
 
 	// Добавление символа в позицию index
 	// Если index лежит за пределами строки то добавляет в конец строки
@@ -46,9 +51,8 @@ private:
 	int baselineOffset;
 	//Размер (высота) базового символа. Меняется только специальным методом.
 	int simpleSymbolHeight;
-
-	//Пересчитать высоты
-	void recalculate();
+	//Если строка находится в сложном символе, то родитель - это строка в которой находится сложный символ
+	CLineOfSymbols* parent;
 
 	//Левый верхний угол, ширина, высота (обновляется при перерисовке)
 	//Служебная инфа, поэтому mutable (символ сам от этого не меняется)

@@ -6,13 +6,15 @@
 CLineOfSymbols::CLineOfSymbols( int _simpleSymbolHeight ) :
 	height( _simpleSymbolHeight ),
 	baselineOffset( 0 ),
-	simpleSymbolHeight( _simpleSymbolHeight )
+	simpleSymbolHeight( _simpleSymbolHeight ),
+	parent( 0 )
 {}
 
 CLineOfSymbols::CLineOfSymbols( const CLineOfSymbols& src ) :
 	height( src.height ),
 	baselineOffset( src.baselineOffset ),
-	simpleSymbolHeight( src.simpleSymbolHeight )
+	simpleSymbolHeight( src.simpleSymbolHeight ),
+	parent( 0 )
 {
 
 	for( int i = 0; i < src.Length(); ++i ) {
@@ -55,14 +57,14 @@ void CLineOfSymbols::Push( CSymbol* symbol, int index )
 	} else {
 		arrayOfSymbolPtrs.insert( arrayOfSymbolPtrs.begin() + index, symbol );
 	}
-	height = max( height, symbol->GetHeight( simpleSymbolHeight ) );
-	baselineOffset = max( baselineOffset, symbol->GetBaselineOffset( simpleSymbolHeight ) );
+	Recalculate();
 }
 
 void CLineOfSymbols::Pop( int index )
 {
 	delete( arrayOfSymbolPtrs[index] );
 	arrayOfSymbolPtrs.erase( arrayOfSymbolPtrs.begin() + index );
+	Recalculate();
 }
 
 void CLineOfSymbols::Draw( HDC displayHandle, int posX, int posY ) const
@@ -121,12 +123,16 @@ int CLineOfSymbols::CalculateWidth( HDC displayHandle ) const
 	return result;
 }
 
-void CLineOfSymbols::recalculate()
+void CLineOfSymbols::Recalculate()
 {
 	height = simpleSymbolHeight;
 	baselineOffset = 0;
 	for( int i = 0; i < Length(); ++i ) {
 		height = max( height, arrayOfSymbolPtrs[i]->GetHeight( simpleSymbolHeight ) );
 		baselineOffset = max( baselineOffset, arrayOfSymbolPtrs[i]->GetBaselineOffset( simpleSymbolHeight ) );
+	}
+	
+	if( parent != 0 ) {
+		parent->Recalculate();
 	}
 }

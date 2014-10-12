@@ -50,7 +50,7 @@ STDMETHODIMP CCommandHandler::Execute( UINT nCmdId, UI_EXECUTIONVERB verb, const
 	switch( nCmdId ) {
 	case ID_CMD_SIGMA:
 	{
-		CSigmaSymbol* sigma = new CSigmaSymbol( editWindow->GetSimpleSymbolHeight() );
+		CSigmaSymbol* sigma = new CSigmaSymbol( editWindow->GetCaretLine()->GetSimpleSymbolHeight() );
 		sigma->GetUpperLine().Push( new CSimpleSymbol( L'9' ), 0 );
 		sigma->GetLowerLine().Push( new CSimpleSymbol( L'1' ), 0 );
 		editWindow->AddSymbol( sigma );
@@ -58,7 +58,7 @@ STDMETHODIMP CCommandHandler::Execute( UINT nCmdId, UI_EXECUTIONVERB verb, const
 	}
 	case ID_CMD_FRACTION:
 	{
-		CFractionSymbol* fraction = new CFractionSymbol( editWindow->GetSimpleSymbolHeight() );
+		CFractionSymbol* fraction = new CFractionSymbol( editWindow->GetCaretLine()->GetSimpleSymbolHeight() );
 		fraction->GetUpperLine().Push( new CSimpleSymbol( L'1' ), 0 );
 		fraction->GetLowerLine().Push( new CSimpleSymbol( L'2' ), 0 );
 		editWindow->AddSymbol( fraction );
@@ -66,7 +66,7 @@ STDMETHODIMP CCommandHandler::Execute( UINT nCmdId, UI_EXECUTIONVERB verb, const
 	}
 	case ID_CMD_LOWER_INDEX:
 	{
-		CIndexSymbol* lowerIndex = new CIndexSymbol( editWindow->GetSimpleSymbolHeight(), CIndexSymbol::ITLower );
+		CIndexSymbol* lowerIndex = new CIndexSymbol( editWindow->GetCaretLine()->GetSimpleSymbolHeight( ), CIndexSymbol::ITLower );
 		lowerIndex->GetLine().Push( new CSimpleSymbol( L't' ), 0 );
 		lowerIndex->GetLine().Push( new CSimpleSymbol( L'm' ), 1 );
 		lowerIndex->GetLine().Push( new CSimpleSymbol( L'p' ), 2 );
@@ -75,7 +75,7 @@ STDMETHODIMP CCommandHandler::Execute( UINT nCmdId, UI_EXECUTIONVERB verb, const
 	}
 	case ID_CMD_UPPER_INDEX:
 	{
-		CIndexSymbol* upperIndex = new CIndexSymbol( editWindow->GetSimpleSymbolHeight(), CIndexSymbol::ITUpper );
+		CIndexSymbol* upperIndex = new CIndexSymbol( editWindow->GetCaretLine()->GetSimpleSymbolHeight(), CIndexSymbol::ITUpper );
 		upperIndex->GetLine().Push( new CSimpleSymbol( L't' ), 0 );
 		upperIndex->GetLine().Push( new CSimpleSymbol( L'm' ), 1 );
 		upperIndex->GetLine().Push( new CSimpleSymbol( L'p' ), 2 );
@@ -84,7 +84,7 @@ STDMETHODIMP CCommandHandler::Execute( UINT nCmdId, UI_EXECUTIONVERB verb, const
 	}
 	case ID_CMD_SQRT:
 	{
-		CRootSymbol* root = new CRootSymbol( editWindow->GetSimpleSymbolHeight() );
+		CRootSymbol* root = new CRootSymbol( editWindow->GetCaretLine()->GetSimpleSymbolHeight() );
 		root->GetExponentLine().Push( new CSimpleSymbol( L'2' ), 0 );
 		root->GetRadicandLine().Push( new CSimpleSymbol( L'x' ), 0 );
 		editWindow->AddSymbol( root );

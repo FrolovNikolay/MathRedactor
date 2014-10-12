@@ -15,6 +15,7 @@ public:
 
 	//Временно
 	int GetSimpleSymbolHeight() const { return simpleSymbolHeight; }
+	CLineOfSymbols* GetCaretLine() { return caret.GetLine(); }
 
 	// регистрирует класс окна
 	static bool RegisterClass( HINSTANCE );

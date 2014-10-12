@@ -14,6 +14,7 @@ public:
 	//Создание копии (deep) объекта. 
 	virtual CSymbol* Clone( ) const { return new CSigmaSymbol( *this ); }
 	void GetSubstrings( std::vector<const CLineOfSymbols*>& substrings ) const;
+	void GetSubstrings( std::vector<CLineOfSymbols*>& substrings );
 
 	virtual int GetHeight( int simpleSymbolHeight ) const;
 	virtual int GetBaselineOffset( int simpleSymbolHeight ) const;

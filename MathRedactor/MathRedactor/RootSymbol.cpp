@@ -18,6 +18,12 @@ void CRootSymbol::GetSubstrings( std::vector<const CLineOfSymbols*>& substrings 
 	substrings.push_back( &radicandLine );
 }
 
+void CRootSymbol::GetSubstrings( std::vector<CLineOfSymbols*>& substrings )
+{
+	substrings.push_back( &exponentLine );
+	substrings.push_back( &radicandLine );
+}
+
 void CRootSymbol::Draw( HDC displayHandle, int posX, int posY, int simpleSymbolHeight ) const
 {
 	int rootHeight = getRootHeight( simpleSymbolHeight );

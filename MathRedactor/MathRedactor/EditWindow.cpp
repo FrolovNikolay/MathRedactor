@@ -57,6 +57,12 @@ void CEditWindow::Show( int nCmdShow )
 
 void CEditWindow::AddSymbol( CSymbol* symbol )
 {
+	std::vector<CLineOfSymbols*> substrings;
+	symbol->GetSubstrings( substrings );
+	for( int i = 0; i < substrings.size(); ++i ) {
+		substrings[i]->SetParent( caret.GetLine() );
+	}
+
 	caret.GetLine()->Push( symbol, caret.GetIndex() );
 	caret.Move( DRight );
 	::RedrawWindow( windowHandle, 0, 0, RDW_INVALIDATE | RDW_ERASE );

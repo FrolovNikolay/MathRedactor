@@ -16,6 +16,13 @@ void CFractionSymbol::GetSubstrings( std::vector<const CLineOfSymbols*>& substri
 	substrings.push_back( &lowerLine );
 }
 
+void CFractionSymbol::GetSubstrings( std::vector<CLineOfSymbols*>& substrings )
+{
+	substrings.push_back( &upperLine );
+	substrings.push_back( &lowerLine );
+}
+
+
 void CFractionSymbol::Draw( HDC displayHandle, int posX, int posY, int simpleSymbolHeight ) const
 {
 	//Рисуем разделитель
@@ -60,11 +67,11 @@ int CFractionSymbol::CalculateWidth( HDC displayHandle ) const
 
 int CFractionSymbol::GetHeight( int simpleSymbolHeight ) const
 {
-	return upperLine.GetHeight( ) + lowerLine.GetHeight( ) + getUpperOffset( ) +
-		getLowerOffset( ) + getStrokeHeight( );
+	return upperLine.GetHeight() + lowerLine.GetHeight() + getUpperOffset() +
+		getLowerOffset() + getStrokeHeight();
 }
 
 int CFractionSymbol::GetBaselineOffset( int simpleSymbolHeight ) const
 {
-	return upperLine.GetHeight( ) + getUpperOffset( ) - simpleSymbolHeight / 2;
+	return upperLine.GetHeight() + getUpperOffset() - simpleSymbolHeight / 2;
 }
