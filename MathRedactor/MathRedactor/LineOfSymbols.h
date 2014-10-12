@@ -12,7 +12,9 @@ class CLineOfSymbols {
 public:
 	CLineOfSymbols( int _simpleSymbolHeight );
 	CLineOfSymbols( const CLineOfSymbols& src );
-	~CLineOfSymbols( );
+	~CLineOfSymbols();
+
+	CLineOfSymbols& operator=( const CLineOfSymbols& src );
 
 	int GetX() const { return x; }
 	int GetY() const { return y; }

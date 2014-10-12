@@ -21,6 +21,22 @@ CLineOfSymbols::CLineOfSymbols( const CLineOfSymbols& src ) :
 	}
 }
 
+CLineOfSymbols& CLineOfSymbols::operator=( const CLineOfSymbols& src )
+{
+	if( &src == this ) {
+		return *this;
+	}
+
+	height = src.height;
+	baselineOffset = src.baselineOffset;
+	simpleSymbolHeight = src.simpleSymbolHeight;
+	for( int i = 0; i < src.Length(); ++i ) {
+		assert( src[i] != 0 );
+		Push( src[i]->Clone(), i );
+	}
+	return *this;
+}
+
 CLineOfSymbols::~CLineOfSymbols( )
 {
 	for( int i = 0; i < arrayOfSymbolPtrs.size( ); ++i ) {
