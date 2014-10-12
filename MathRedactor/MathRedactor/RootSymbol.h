@@ -19,6 +19,7 @@ public:
 
 	virtual int GetHeight( int simpleSymbolHeight ) const;
 	virtual int GetBaselineOffset( int simpleSymbolHeight ) const;
+	virtual int GetDescent( int simpleSymbolHeight ) const;
 
 	CLineOfSymbols& GetExponentLine( ) { return exponentLine; }
 	const CLineOfSymbols& GetExponentLine( ) const { return exponentLine; }

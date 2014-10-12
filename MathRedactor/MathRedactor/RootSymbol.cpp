@@ -129,3 +129,8 @@ int CRootSymbol::GetBaselineOffset( int simpleSymbolHeight ) const
 	return ( exponentLine.GetHeight() - getExponentVerticalOffset( rootHeight ) ) +
 		( rootHeight - simpleSymbolHeight );
 }
+
+int CRootSymbol::GetDescent( int simpleSymbolHeight ) const
+{
+	return simpleSymbolHeight;
+}

@@ -28,6 +28,12 @@ int CIndexSymbol::GetBaselineOffset( int simpleSymbolHeight ) const
 	return line.GetHeight() / 2;
 }
 
+int CIndexSymbol::GetDescent( int simpleSymbolHeight ) const
+{
+	//TODO: подумать правильно ли это
+	return simpleSymbolHeight;
+}
+
 CLineOfSymbols& CIndexSymbol::GetLine()
 {
 	return line;

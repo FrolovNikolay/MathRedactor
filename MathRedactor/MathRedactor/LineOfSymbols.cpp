@@ -125,12 +125,14 @@ int CLineOfSymbols::CalculateWidth( HDC displayHandle ) const
 
 void CLineOfSymbols::Recalculate()
 {
-	height = simpleSymbolHeight;
+	int descent = 0;
 	baselineOffset = 0;
 	for( int i = 0; i < Length(); ++i ) {
-		height = max( height, arrayOfSymbolPtrs[i]->GetHeight( simpleSymbolHeight ) );
+		descent = max( descent, arrayOfSymbolPtrs[i]->GetDescent( simpleSymbolHeight ) );
 		baselineOffset = max( baselineOffset, arrayOfSymbolPtrs[i]->GetBaselineOffset( simpleSymbolHeight ) );
 	}
+
+	height = descent + baselineOffset;
 	
 	if( parent != 0 ) {
 		parent->Recalculate();

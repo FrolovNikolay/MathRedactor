@@ -21,7 +21,9 @@ public:
 	int GetWidth() const { return width; }
 	//Получить сдвиг базовой линии
 	virtual int GetBaselineOffset( int simpleSymbolHeight ) const = 0;
-	//Получить массив указателей на подстроки (может быть пустым). Освобождать память нельзя 
+	//Расстояние от базовой линии до нижней точки
+	virtual int GetDescent( int simpleSymbolHeight ) const = 0;
+	//Получить массив указателей на подстроки (может быть пустым). Освобождать память нельзя
 	virtual void GetSubstrings( std::vector<const CLineOfSymbols*>& substrings ) const = 0;
 	virtual void GetSubstrings( std::vector<CLineOfSymbols*>& substrings ) = 0;
 

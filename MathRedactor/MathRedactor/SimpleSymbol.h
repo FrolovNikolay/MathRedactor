@@ -16,6 +16,7 @@ public:
 	//Получить высоту символа
 	virtual int GetHeight( int simpleSymbolHeight ) const { return simpleSymbolHeight; }
 	virtual int GetBaselineOffset( int simpleSymbolHeight ) const { return 0; }
+	virtual int GetDescent( int simpleSymbolHeight ) const { return simpleSymbolHeight; }
 
 	//Создание копии (deep) объекта
 	virtual CSymbol* Clone( ) const { return new CSimpleSymbol( *this ); }

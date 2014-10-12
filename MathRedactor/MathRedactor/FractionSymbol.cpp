@@ -75,3 +75,8 @@ int CFractionSymbol::GetBaselineOffset( int simpleSymbolHeight ) const
 {
 	return upperLine.GetHeight() + getUpperOffset() - simpleSymbolHeight / 2;
 }
+
+int CFractionSymbol::GetDescent( int simpleSymbolHeight ) const
+{
+	return lowerLine.GetHeight() + getLowerOffset() + getStrokeHeight() + simpleSymbolHeight / 2;
+}

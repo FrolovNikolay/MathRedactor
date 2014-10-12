@@ -119,3 +119,8 @@ int CSigmaSymbol::GetBaselineOffset( int simpleSymbolHeight ) const
 	return upperLine.GetHeight() + getSublinesOffset() +
 		( getSigmaHeight( simpleSymbolHeight ) - simpleSymbolHeight ) / 2;
 }
+
+int CSigmaSymbol::GetDescent( int simpleSymbolHeight ) const
+{
+	return lowerLine.GetHeight() + getSublinesOffset() + ( getSigmaHeight( simpleSymbolHeight ) + simpleSymbolHeight ) / 2;
+}

@@ -30,6 +30,7 @@ public:
 	virtual int GetHeight( int simpleSymbolHeight ) const;
 	// отступ символа от базовой линии
 	virtual int GetBaselineOffset( int simpleSymbolHeight ) const;
+	virtual int GetDescent( int simpleSymbolHeight ) const;
 
 	CLineOfSymbols& GetLine();
 	const CLineOfSymbols& GetLine() const;
