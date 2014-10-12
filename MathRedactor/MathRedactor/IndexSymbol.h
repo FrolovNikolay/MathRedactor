@@ -18,6 +18,9 @@ public:
 
 	// Создание независимой копии символа
 	virtual CSymbol* Clone() const;
+	//Получить массив указателей на подстроки (может быть пустым) 
+	virtual void GetSubstrings( std::vector<const CLineOfSymbols*>& substrings ) const
+		{ substrings.push_back( &line ); }
 
 	// Высота символа
 	virtual int GetHeight( int simpleSymbolHeight ) const;

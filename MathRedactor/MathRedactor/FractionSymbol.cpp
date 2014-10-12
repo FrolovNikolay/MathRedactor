@@ -10,6 +10,12 @@ lowerLine( simpleSymbolHeight )
 
 }
 
+void CFractionSymbol::GetSubstrings( std::vector<const CLineOfSymbols*>& substrings ) const
+{
+	substrings.push_back( &upperLine );
+	substrings.push_back( &lowerLine );
+}
+
 void CFractionSymbol::Draw( HDC displayHandle, int posX, int posY, int simpleSymbolHeight ) const
 {
 	//Рисуем разделитель

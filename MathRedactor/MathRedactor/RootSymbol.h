@@ -13,6 +13,8 @@ public:
 
 	//Создание копии (deep) объекта. 
 	virtual CSymbol* Clone( ) const { return new CRootSymbol( *this ); }
+	//Получить массив указателей на подстроки (может быть пустым) 
+	virtual void GetSubstrings( std::vector<const CLineOfSymbols*>& substrings ) const;
 
 	virtual int GetHeight( int simpleSymbolHeight ) const;
 	virtual int GetBaselineOffset( int simpleSymbolHeight ) const;

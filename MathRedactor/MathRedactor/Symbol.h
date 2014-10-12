@@ -3,6 +3,7 @@
 #pragma once
 
 #include <Windows.h>
+#include <vector>
 
 class CLineOfSymbols;
 
@@ -20,6 +21,8 @@ public:
 	int GetWidth() const { return width; }
 	//Получить сдвиг базовой линии
 	virtual int GetBaselineOffset( int simpleSymbolHeight ) const = 0;
+	//Получить массив указателей на подстроки (может быть пустым). Освобождать память нельзя 
+	virtual void GetSubstrings( std::vector<const CLineOfSymbols*>& substrings ) const = 0;
 
 	//Создание копии (deep) объекта (паттерн Prototype)
 	virtual CSymbol* Clone( ) const = 0;
