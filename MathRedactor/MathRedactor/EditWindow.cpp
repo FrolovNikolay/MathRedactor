@@ -35,7 +35,7 @@ bool CEditWindow::RegisterClass( HINSTANCE classOwnerInstance )
 	classInfo.cbSize = sizeof( WNDCLASSEX );
 	classInfo.hInstance = classOwnerInstance;
 	classInfo.lpszClassName = className;
-	classInfo.style = CS_HREDRAW | CS_VREDRAW ;
+	classInfo.style = CS_HREDRAW | CS_VREDRAW;
 	classInfo.lpfnWndProc = &CEditWindow::windowProcedure;
 
 	return ( ::RegisterClassEx( &classInfo ) != 0 );
@@ -43,7 +43,7 @@ bool CEditWindow::RegisterClass( HINSTANCE classOwnerInstance )
 
 HWND CEditWindow::Create( HWND parent, HINSTANCE ownerInstance )
 {
-	DWORD style = WS_CHILD | WS_VISIBLE;
+	DWORD style = WS_CHILD | WS_VISIBLE | WS_HSCROLL | WS_VSCROLL;
 
 	windowHandle = ::CreateWindowEx( 0, className, 0, style, 0, 0, 0, 0, parent, 0, ownerInstance, this );
 
@@ -80,7 +80,8 @@ void CEditWindow::AddSign( wchar_t sign )
 	if( isSymbolAllowed( sign ) ) {
 		AddSymbol( new CSimpleSymbol( sign ) );
 	}
-	InvalidateRect( windowHandle, 0, true );
+	recalculateHorzScrollParams();
+	::InvalidateRect( windowHandle, 0, true );
 }
 
 void CEditWindow::RemoveSign()
@@ -96,7 +97,9 @@ void CEditWindow::RemoveSign()
 		}
 		content.erase( content.begin() + lineIndex );
 		caret.MoveTo( &content[lineIndex - 1], pos );
+		recalculateVertScrollParams();
 	}
+	recalculateHorzScrollParams();
 	::RedrawWindow( windowHandle, 0, 0, RDW_INVALIDATE );
 }
 
@@ -116,6 +119,7 @@ void CEditWindow::NewLine()
 			content[lineIndex].Pop( i );
 		}
 		caret.MoveTo( &content[lineIndex + 1], 0 );
+		recalculateVertScrollParams();
 		::RedrawWindow( windowHandle, 0, 0, RDW_INVALIDATE );
 	}
 }
@@ -280,16 +284,16 @@ void CEditWindow::OnWmHScroll( WPARAM wParam, LPARAM lParam )
 		::GetScrollInfo( windowHandle, SB_HORZ, &scrollInfo );
 		switch( LOWORD( wParam ) ) {
 		case SB_LINELEFT:
-			scrollInfo.nPos += 1;
+			scrollInfo.nPos = max( scrollInfo.nPos - 1, scrollInfo.nMin );
 			break;
 		case SB_LINERIGHT:
-			scrollInfo.nPos -= 1;
+			scrollInfo.nPos = min( scrollInfo.nPos + 1, scrollInfo.nMax );
 			break;
 		case SB_PAGELEFT:
-			scrollInfo.nPos += scrollInfo.nPage;
+			scrollInfo.nPos = max( scrollInfo.nPos - scrollInfo.nPage, scrollInfo.nMin );
 			break;
 		case SB_PAGERIGHT:
-			scrollInfo.nPos -= scrollInfo.nPage;
+			scrollInfo.nPos = min( scrollInfo.nPos + scrollInfo.nPage, scrollInfo.nMax );
 			break;
 		case SB_THUMBTRACK:
 			scrollInfo.nPos = scrollInfo.nTrackPos;
@@ -317,16 +321,16 @@ void CEditWindow::OnWmVScroll( WPARAM wParam, LPARAM lParam )
 		::GetScrollInfo( windowHandle, SB_VERT, &scrollInfo );
 		switch( LOWORD( wParam ) ) {
 		case SB_LINEUP:
-			scrollInfo.nPos += 1;
+			scrollInfo.nPos = max( scrollInfo.nPos - 1, scrollInfo.nMin );
 			break;
 		case SB_LINEDOWN:
-			scrollInfo.nPos -= 1;
+			scrollInfo.nPos = min( scrollInfo.nPos + 1, scrollInfo.nMax );
 			break;
 		case SB_PAGEUP:
-			scrollInfo.nPos += scrollInfo.nPage;
+			scrollInfo.nPos = max( scrollInfo.nPos - scrollInfo.nPage, scrollInfo.nMin );
 			break;
 		case SB_PAGEDOWN:
-			scrollInfo.nPos -= scrollInfo.nPage;
+			scrollInfo.nPos = min( scrollInfo.nPos + scrollInfo.nPage, scrollInfo.nMax );
 			break;
 		case SB_THUMBTRACK:
 			scrollInfo.nPos = scrollInfo.nTrackPos;
@@ -346,27 +350,8 @@ void CEditWindow::OnWmVScroll( WPARAM wParam, LPARAM lParam )
 
 void CEditWindow::OnWmSize( LPARAM lParam ) 
 {
-	int width = LOWORD( lParam );
-	int hieght = HIWORD( lParam );
-
-	RECT editClientRect, parentClientRect;
-	::GetClientRect( windowHandle, &editClientRect );
-	::GetClientRect( ::GetParent( windowHandle ), &parentClientRect );
-
-	SCROLLINFO scrollInfo;
-	scrollInfo.cbSize = sizeof( SCROLLINFO );
-	scrollInfo.fMask = SIF_RANGE | SIF_PAGE;
-	scrollInfo.nMin = 0;
-
-	// горизонтальный скролл
-	scrollInfo.nMax = editClientRect.right / horizontalScrollUnit;
-	scrollInfo.nPage = editClientRect.right / horizontalScrollUnit;
-	::SetScrollInfo( windowHandle, SB_HORZ, &scrollInfo, TRUE );
-
-	// вертиклаьный скролл
-	scrollInfo.nMax = editClientRect.bottom / verticalScrollUnit;
-	scrollInfo.nPage = editClientRect.bottom / verticalScrollUnit;
-	::SetScrollInfo( windowHandle, SB_VERT, &scrollInfo, TRUE );
+	recalculateHorzScrollParams();
+	recalculateVertScrollParams();
 }
 
 void CEditWindow::OnLButDown( LPARAM lParam )
@@ -553,6 +538,65 @@ int CEditWindow::getBaseLineIndex( const CLineOfSymbols* line ) const
 
 	return -1;
 }
+
+// пересчитывает параметры горизонтального скролла
+void CEditWindow::recalculateHorzScrollParams() const
+{
+	RECT clientRect;
+	::GetClientRect( windowHandle, &clientRect );
+
+	int width = 0;
+
+	for( int i = 0; i < content.size(); ++i ) {
+		width = max( content[i].GetWidth(), width );
+	}
+
+	SCROLLINFO scrollInfo;
+	::ZeroMemory( &scrollInfo, sizeof( SCROLLINFO ) );
+	scrollInfo.cbSize = sizeof( SCROLLINFO );
+	scrollInfo.fMask = SIF_ALL;
+
+	::GetScrollInfo( windowHandle, SB_HORZ, &scrollInfo );
+	scrollInfo.fMask = SIF_PAGE | SIF_RANGE | SIF_POS;
+
+	scrollInfo.nMax = width / horizontalScrollUnit;
+	scrollInfo.nPage = clientRect.right / horizontalScrollUnit;
+	if( scrollInfo.nPos > scrollInfo.nMax ) {
+		scrollInfo.nPos = scrollInfo.nMax;
+	}
+
+	::SetScrollInfo( windowHandle, SB_HORZ, &scrollInfo, TRUE );
+}
+
+// пересчитывает параметры вертикального скролла
+void CEditWindow::recalculateVertScrollParams() const
+{
+	RECT clientRect;
+	::GetClientRect( windowHandle, &clientRect );
+
+	int height = 0;
+
+	for( int i = 0; i < content.size(); ++i ) {
+		height += content[i].GetHeight();
+	}
+
+	SCROLLINFO scrollInfo;
+	::ZeroMemory( &scrollInfo, sizeof( SCROLLINFO ) );
+	scrollInfo.cbSize = sizeof( SCROLLINFO );
+	scrollInfo.fMask = SIF_ALL;
+
+	::GetScrollInfo( windowHandle, SB_VERT, &scrollInfo );
+	scrollInfo.fMask = SIF_PAGE | SIF_RANGE | SIF_POS;
+
+	scrollInfo.nMax = height / verticalScrollUnit;
+	scrollInfo.nPage = clientRect.bottom / verticalScrollUnit;
+	if( scrollInfo.nPos > scrollInfo.nMax ) {
+		scrollInfo.nPos = scrollInfo.nMax;
+	}
+
+	::SetScrollInfo( windowHandle, SB_VERT, &scrollInfo, TRUE );
+}
+
 
 // класс CCaret
 

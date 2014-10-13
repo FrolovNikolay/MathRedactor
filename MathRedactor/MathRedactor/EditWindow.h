@@ -142,4 +142,7 @@ private:
 
 	bool isSymbolAllowed( wchar_t ) const;
 	int getBaseLineIndex( const CLineOfSymbols* ) const;
+
+	void recalculateVertScrollParams() const;
+	void recalculateHorzScrollParams() const;
 };

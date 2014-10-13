@@ -134,7 +134,7 @@ void CMainWindow::OnWmSize()
 	RECT clientRect;
 	::GetClientRect( windowHandle, &clientRect );
 
-	::SetWindowPos( editHandle, 0, 0, ribbonHeight, clientRect.right, clientRect.bottom, 0 );
+	::SetWindowPos( editHandle, 0, 0, ribbonHeight, clientRect.right, clientRect.bottom - ribbonHeight, 0 );
 }
 
 void CMainWindow::OnWmChar( WPARAM code )
