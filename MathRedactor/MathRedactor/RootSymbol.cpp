@@ -12,6 +12,20 @@ CRootSymbol::CRootSymbol( int simpleSymbolHeight ) :
 
 }
 
+CSymbol* CRootSymbol::Clone( CLineOfSymbols* parent ) const
+{
+	CSymbol* copy = new CRootSymbol( *this );
+	copy->UpdateParent( parent );
+	return copy;
+}
+
+void CRootSymbol::UpdateParent( CLineOfSymbols* parent )
+{
+	exponentLine.SetParent( parent );
+	radicandLine.SetParent( parent );
+}
+
+
 void CRootSymbol::GetSubstrings( std::vector<const CLineOfSymbols*>& substrings ) const
 {
 	substrings.push_back( &exponentLine );

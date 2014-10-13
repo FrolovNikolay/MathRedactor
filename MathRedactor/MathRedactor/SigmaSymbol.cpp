@@ -12,6 +12,19 @@ lowerLine( calculateSublineHeight( simpleSymbolHeight ) )
 
 }
 
+CSymbol* CSigmaSymbol::Clone( CLineOfSymbols* parent ) const
+{
+	CSymbol* copy = new CSigmaSymbol( *this );
+	copy->UpdateParent( parent );
+	return copy;
+}
+
+void CSigmaSymbol::UpdateParent( CLineOfSymbols* parent )
+{
+	upperLine.SetParent( parent );
+	lowerLine.SetParent( parent );
+}
+
 void CSigmaSymbol::GetSubstrings( std::vector<const CLineOfSymbols*>& substrings ) const
 {
 	substrings.push_back( &upperLine );

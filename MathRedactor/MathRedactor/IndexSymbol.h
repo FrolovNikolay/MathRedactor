@@ -17,7 +17,8 @@ public:
 	CIndexSymbol( int simpleSymbolHeight, TIndexType type );
 
 	// Создание независимой копии символа
-	virtual CSymbol* Clone() const;
+	virtual CSymbol* Clone( CLineOfSymbols* parent ) const;
+	virtual void UpdateParent( CLineOfSymbols* parent );
 	//Получить массив указателей на подстроки (может быть пустым) 
 	virtual void GetSubstrings( std::vector<const CLineOfSymbols*>& substrings ) const
 		{ substrings.push_back( &line ); }

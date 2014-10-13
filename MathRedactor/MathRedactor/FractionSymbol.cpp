@@ -10,6 +10,20 @@ lowerLine( simpleSymbolHeight )
 
 }
 
+CSymbol* CFractionSymbol::Clone( CLineOfSymbols* parent ) const
+{
+	CSymbol* copy = new CFractionSymbol( *this );
+	copy->UpdateParent( parent );
+	return copy;
+}
+
+void CFractionSymbol::UpdateParent( CLineOfSymbols* parent )
+{
+	upperLine.SetParent( parent );
+	lowerLine.SetParent( parent );
+}
+
+
 void CFractionSymbol::GetSubstrings( std::vector<const CLineOfSymbols*>& substrings ) const
 {
 	substrings.push_back( &upperLine );

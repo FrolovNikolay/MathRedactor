@@ -12,7 +12,8 @@ public:
 	CFractionSymbol( int simpleSymbolHeight );
 
 	//Создание копии (deep) объекта. 
-	virtual CSymbol* Clone( ) const { return new CFractionSymbol( *this ); }
+	virtual CSymbol* Clone( CLineOfSymbols* ) const;
+	virtual void UpdateParent( CLineOfSymbols* parent );
 	//Получить массив указателей на подстроки (может быть пустым)
 	virtual void GetSubstrings( std::vector<const CLineOfSymbols*>& substrings ) const;
 	virtual void GetSubstrings( std::vector<CLineOfSymbols*>& substrings );

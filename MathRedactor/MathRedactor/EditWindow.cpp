@@ -93,13 +93,8 @@ void CEditWindow::RemoveSign()
 		int lineIndex = getBaseLineIndex( caret.GetLine() );
 		int pos = content[lineIndex - 1].Length();
 		for( int i = 0; i < content[lineIndex].Length(); ++i ) {
-			CSymbol* copy = content[lineIndex][i]->Clone();
-			std::vector<CLineOfSymbols*> substrings;
-			copy->GetSubstrings( substrings );
-			for( int j = 0; j < substrings.size( ); ++j ) {
-				substrings[j]->SetParent( &content[lineIndex - 1] );
-			}
-			content[lineIndex - 1].Push( copy, content[lineIndex - 1].Length() );
+			content[lineIndex - 1].Push( content[lineIndex][i]->Clone( &content[lineIndex - 1] ), 
+				content[lineIndex - 1].Length() );
 		}
 		content.erase( content.begin() + lineIndex );
 		caret.MoveTo( &content[lineIndex - 1], pos );
@@ -119,13 +114,8 @@ void CEditWindow::NewLine()
 			content.insert( content.begin() + lineIndex + 1, 1, CLineOfSymbols( simpleSymbolHeight ) );
 		}
 		for( int i = caret.GetIndex(); i < content[lineIndex].Length(); ++i ) {
-			CSymbol* copy = content[lineIndex][i]->Clone();
-			std::vector<CLineOfSymbols*> substrings;
-			copy->GetSubstrings( substrings );
-			for( int j = 0; j < substrings.size( ); ++j ) {
-				substrings[j]->SetParent( &content[lineIndex + 1] );
-			}
-			content[lineIndex + 1].Push( copy, i - caret.GetIndex() );
+			content[lineIndex + 1].Push( content[lineIndex][i]->Clone( &content[lineIndex + 1] ),
+				i - caret.GetIndex() );
 		}
 		for( int i = content[lineIndex].Length() - 1; i >= caret.GetIndex(); --i ) {
 			content[lineIndex].Pop( i );
@@ -524,7 +514,7 @@ void CEditWindow::removeSelectedSymbols()
 				content[startLine].Pop( startSymbol );
 			}
 			for( int i = lastSymbol + 1; i < content[lastLine].Length(); ++i ) {
-				content[startLine].Push( content[lastLine][i]->Clone(), startSymbol + i );
+				content[startLine].Push( content[lastLine][i]->Clone( &content[startLine] ), startSymbol + i );
 			}
 			content.erase( content.begin() + startLine + 1, content.begin() + lastLine + 1 );
 		}

@@ -13,10 +13,18 @@ CIndexSymbol::CIndexSymbol( int simpleSymbolHeight, CIndexSymbol::TIndexType _ty
 
 }
 
-CSymbol* CIndexSymbol::Clone() const
+void CIndexSymbol::UpdateParent( CLineOfSymbols* parent )
 {
-	return new CIndexSymbol( *this );
+	line.SetParent( parent );
 }
+
+CSymbol* CIndexSymbol::Clone( CLineOfSymbols* parent ) const
+{
+	CSymbol* copy = new CIndexSymbol( *this );
+	copy->UpdateParent( parent );
+	return copy;
+}
+
 
 int CIndexSymbol::GetHeight( int simpleSymbolHeight ) const
 {

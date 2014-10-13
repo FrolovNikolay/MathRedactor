@@ -19,7 +19,8 @@ public:
 	virtual int GetDescent( int simpleSymbolHeight ) const { return simpleSymbolHeight; }
 
 	//Создание копии (deep) объекта
-	virtual CSymbol* Clone( ) const { return new CSimpleSymbol( *this ); }
+	virtual CSymbol* Clone( CLineOfSymbols* parent ) const { return new CSimpleSymbol( *this ); }
+	virtual void UpdateParent( CLineOfSymbols* parent ) {}
 	//У простого символа нет подстрок
 	virtual void GetSubstrings( std::vector<const CLineOfSymbols*>& substrings ) const {}
 	virtual void GetSubstrings( std::vector<CLineOfSymbols*>& substrings ) {}

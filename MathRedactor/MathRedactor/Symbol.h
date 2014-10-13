@@ -28,7 +28,8 @@ public:
 	virtual void GetSubstrings( std::vector<CLineOfSymbols*>& substrings ) = 0;
 
 	//Создание копии (deep) объекта (паттерн Prototype)
-	virtual CSymbol* Clone( ) const = 0;
+	virtual CSymbol* Clone( CLineOfSymbols* parent ) const = 0;
+	virtual void UpdateParent( CLineOfSymbols* parent ) = 0;
 
 	//Нарисовать символ в displayHandle, начиная с позиции (startX, startY) - левый верхний угол. Используется
 	//текущие FONT и PEN

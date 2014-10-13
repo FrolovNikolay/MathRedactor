@@ -19,13 +19,7 @@ CLineOfSymbols::CLineOfSymbols( const CLineOfSymbols& src ) :
 
 	for( int i = 0; i < src.Length(); ++i ) {
 		assert( src[i] != 0 );
-		CSymbol* copy = src[i]->Clone();
-		std::vector<CLineOfSymbols*> substrings;
-		copy->GetSubstrings( substrings );
-		for( int j = 0; j < substrings.size(); ++j ) {
-			substrings[j]->SetParent( this );
-		}
-		Push( copy, i );
+		Push( src[i]->Clone( this ), i );
 	}
 }
 
@@ -40,13 +34,7 @@ CLineOfSymbols& CLineOfSymbols::operator=( const CLineOfSymbols& src )
 	simpleSymbolHeight = src.simpleSymbolHeight;
 	for( int i = 0; i < src.Length(); ++i ) {
 		assert( src[i] != 0 );
-		CSymbol* copy = src[i]->Clone( );
-		std::vector<CLineOfSymbols*> substrings;
-		copy->GetSubstrings( substrings );
-		for( int j = 0; j < substrings.size( ); ++j ) {
-			substrings[j]->SetParent( this );
-		}
-		Push( copy, i );
+		Push( src[i]->Clone( this ), i );
 	}
 	return *this;
 }

@@ -12,7 +12,8 @@ public:
 	CSigmaSymbol( int simpleSymbolHeight );
 
 	//Создание копии (deep) объекта. 
-	virtual CSymbol* Clone( ) const { return new CSigmaSymbol( *this ); }
+	virtual CSymbol* Clone( CLineOfSymbols* parent ) const;
+	virtual void UpdateParent( CLineOfSymbols* parent );
 	void GetSubstrings( std::vector<const CLineOfSymbols*>& substrings ) const;
 	void GetSubstrings( std::vector<CLineOfSymbols*>& substrings );
 
