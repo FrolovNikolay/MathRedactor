@@ -218,7 +218,7 @@ void CItemSelector::findBaseLine( int x, int y )
 void CItemSelector::isLineBase( const CLineOfSymbols& currentBaseLine, int x, int y )
 {
 	// находим символ, в котором может оказаться очередная подстрока
-	int currentX = 0;
+	int currentX = currentBaseLine.GetX();
 	int symbolIdx = 0;
 	for( ; symbolIdx < currentBaseLine.Length(); ++symbolIdx ) {
 		currentX += currentBaseLine[symbolIdx]->GetWidth();

@@ -448,7 +448,7 @@ LRESULT __stdcall CEditWindow::windowProcedure( HWND windowHandle, UINT message,
 CLineOfSymbols* CEditWindow::isLineBase( CLineOfSymbols& currentBaseLine, int x, int y )
 {
 	// находим символ, в котором может оказаться очередная подстрока
-	int currentX = 0;
+	int currentX = currentBaseLine.GetX();
 	int symbolIdx = 0;
 	for( ; symbolIdx < currentBaseLine.Length(); ++symbolIdx ) {
 		currentX += currentBaseLine[symbolIdx]->GetWidth();
