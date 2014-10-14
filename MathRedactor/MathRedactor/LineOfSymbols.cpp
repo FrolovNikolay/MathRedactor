@@ -90,7 +90,13 @@ void CLineOfSymbols::Draw( HDC displayHandle, int posX, int posY ) const
 		arrayOfSymbolPtrs[i]->Draw( displayHandle, posX, posY + baselineOffset, simpleSymbolHeight );
 		posX += arrayOfSymbolPtrs[i]->CalculateWidth( displayHandle );
 	}
+	
 	width = posX - x;
+
+	if( width == 0 ) {
+		::GetObject( font, sizeof( LOGFONT ), &fontInfo );
+		width = fontInfo.lfWidth;
+	}
 
 	//Возвращаем старый шрифт, удаляем созданный
 	::SelectObject( displayHandle, oldFont );
@@ -116,6 +122,11 @@ int CLineOfSymbols::CalculateWidth( HDC displayHandle ) const
 		result += arrayOfSymbolPtrs[i]->CalculateWidth( displayHandle );
 	}
 
+	if( result == 0 ) {
+		::GetObject( font, sizeof( LOGFONT ), &fontInfo );
+		result = fontInfo.lfWidth;
+	}
+
 	//Возвращаем старый шрифт, удаляем созданный
 	::SelectObject( displayHandle, oldFont );
 	::DeleteObject( font );
@@ -125,7 +136,7 @@ int CLineOfSymbols::CalculateWidth( HDC displayHandle ) const
 
 void CLineOfSymbols::Recalculate()
 {
-	int descent = 0;
+	int descent = simpleSymbolHeight;
 	baselineOffset = 0;
 	for( int i = 0; i < Length(); ++i ) {
 		descent = max( descent, arrayOfSymbolPtrs[i]->GetDescent( simpleSymbolHeight ) );
