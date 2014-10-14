@@ -9,17 +9,17 @@
 
 class CItemSelector {
 public:
-	CItemSelector( const std::vector<CLineOfSymbols>& _content );
+	CItemSelector( std::vector<CLineOfSymbols>& _content );
 	~CItemSelector();
 
 	// Установка начальной позиции курсора
-	void SetStartPosition( int x, int y );
+	void SetStartPosition( int x, int y, int moveX, int moveY );
 	// Установка текущей позиции курсора
-	void SetCurrentPosition( int x, int y );
+	void SetCurrentPosition( int x, int y, int moveX, int moveY );
 	// Проверить наличие выделения
 	bool HasSelection() const;
 	// Выделить символы, в соответствии с заданными в классе координатами
-	void MakeSelection( HDC displayHandle, int width, int height ) const;
+	void MakeSelection( HDC displayHandle, int width, int height, int moveX, int moveY ) const;
 	// Отменить выделение
 	void ResetSelection();
 	//
@@ -31,7 +31,7 @@ public:
 
 private:
 	// содержимое окна
-	const std::vector<CLineOfSymbols>& content;
+	std::vector<CLineOfSymbols>& content;
 	// координаты начала выделения
 	int startX, startY;
 	// координаты конца выделения
@@ -41,14 +41,15 @@ private:
 
 	CItemSelector();
 
-	void findBaseLine( int x, int y );
+	void findBaseLine( int x, int y, int moveX, int moveY );
 
-	void isLineBase( const CLineOfSymbols& currentBaseLine, int x, int y );
+	void isLineBase( CLineOfSymbols* currentBaseLine, int x, int y );
 
 	void getItemInfo( int x, int y, int& line, int& symbolIdx ) const;
 
 	void drawSelection( HDC displayHandle, int width, int height, int leftTopX, int leftTopY, int firstLineHeight,
-		int rightBotX, int RightBotY, int lastLineHeight ) const;
+		int rightBotX, int RightBotY, int lastLineHeight, int moveX, int moveY ) const;
 
-	void drawSelection( HDC displayHandle, int leftTopX, int leftTopY, int rightBotX, int rightBotY ) const;
+	void drawSelection( HDC displayHandle, int leftTopX, int leftTopY, int rightBotX, int rightBotY,
+		int moveX, int moveY ) const;
 };

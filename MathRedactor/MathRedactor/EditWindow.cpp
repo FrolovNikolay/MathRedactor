@@ -146,29 +146,35 @@ void CEditWindow::MoveCaret( CEditWindow::TDirection direction )
 
 void CEditWindow::MoveCaretTo( int x, int y )
 {
+	SCROLLINFO scrollInfo;
+	::ZeroMemory( &scrollInfo, sizeof( SCROLLINFO ) );
+	scrollInfo.cbSize = sizeof( SCROLLINFO );
+	scrollInfo.fMask = SIF_ALL;
+
+	::GetScrollInfo( windowHandle, SB_HORZ, &scrollInfo );
+	int movedX = scrollInfo.nPos * horizontalScrollUnit + x;
+	::GetScrollInfo( windowHandle, SB_VERT, &scrollInfo );
+	int movedY = scrollInfo.nPos * verticalScrollUnit + y;
 	int lineIdx = 0;
 	int symbolIdx = 0;
 
 	int currentY = 0;
 	for( lineIdx = 0; lineIdx < content.size(); ++lineIdx ) {
 		currentY += content[lineIdx].GetHeight();
-		if( currentY >= y ) {
+		if( currentY >= movedY ) {
 			break;
 		}
 	}
-	if( currentY < y ) {
+	if( currentY < movedY ) {
+		caret.MoveTo( &content[content.size() - 1], content[content.size() - 1].Length() );
 		return;
 	}
 	int currentX = 0;
 	for( symbolIdx = 0; symbolIdx < content[lineIdx].Length(); ++symbolIdx ) {
 		currentX += content[lineIdx][symbolIdx]->GetWidth();
-		if( currentX >= x ) {
+		if( currentX >= movedX ) {
 			break;
 		} 
-	}
-	if( currentX < x ) {
-		++lineIdx ;
-		symbolIdx = -1;
 	}
 
 	CLineOfSymbols* baseLine;
@@ -177,12 +183,12 @@ void CEditWindow::MoveCaretTo( int x, int y )
 	if( lineIdx == content.size() ) {
 		baseLine = &content[--lineIdx];
 	} else {
-		baseLine = isLineBase( content[lineIdx], x, y );
+		baseLine = isLineBase( &content[lineIdx], x, y );
 	}
 	if( baseLine->Length() == 0 ) {
 		symbolIdx = -1;
 	} else {
-		currentX = 0;
+		currentX = baseLine->GetX();
 		for( symbolIdx = 0; symbolIdx < baseLine->Length(); ++symbolIdx ) {
 			currentX += (*baseLine)[symbolIdx]->GetWidth();
 			if( currentX > x ) {
@@ -208,14 +214,14 @@ void CEditWindow::OnWmPaint( )
 		caret.Hide();
 	}
 
+	PAINTSTRUCT paintInfo;
+	HDC displayHandle = ::BeginPaint( windowHandle, &paintInfo );
+	assert( displayHandle != 0 );
+
 	SCROLLINFO scrollInfo;
 	::ZeroMemory( &scrollInfo, sizeof( SCROLLINFO ) );
 	scrollInfo.cbSize = sizeof( SCROLLINFO );
 	scrollInfo.fMask = SIF_ALL;
-
-	PAINTSTRUCT paintInfo;
-	HDC displayHandle = ::BeginPaint( windowHandle, &paintInfo );
-	assert( displayHandle != 0 );
 
 	::GetScrollInfo( windowHandle, SB_HORZ, &scrollInfo );
 	int posX = - scrollInfo.nPos * horizontalScrollUnit;
@@ -246,7 +252,7 @@ void CEditWindow::OnWmPaint( )
 	assert( font != 0 );
 
 	if( symbolSelector.HasSelection() ) {
-		symbolSelector.MakeSelection( memDC, width, height );
+		symbolSelector.MakeSelection( memDC, width, height, posX, posY );
 	}
 
 	HFONT oldFont = (HFONT) ::SelectObject( memDC, font );
@@ -370,15 +376,25 @@ void CEditWindow::OnWmSize( LPARAM lParam )
 
 void CEditWindow::OnLButDown( LPARAM lParam )
 {
+	SCROLLINFO scrollInfo;
+	::ZeroMemory( &scrollInfo, sizeof( SCROLLINFO ) );
+	scrollInfo.cbSize = sizeof( SCROLLINFO );
+	scrollInfo.fMask = SIF_ALL;
+
+	::GetScrollInfo( windowHandle, SB_HORZ, &scrollInfo );
+	int moveX = scrollInfo.nPos * horizontalScrollUnit;
+	::GetScrollInfo( windowHandle, SB_VERT, &scrollInfo );
+	int moveY = scrollInfo.nPos * verticalScrollUnit;
+
 	int x = GET_X_LPARAM( lParam );
 	int y = GET_Y_LPARAM( lParam );
 
-	symbolSelector.ResetSelection();
 	MoveCaretTo( x, y );
+	symbolSelector.ResetSelection();
 	if( !caret.IsShown() ) {
 		ShowCaret();
 	}
-	symbolSelector.SetStartPosition( x, y );
+	symbolSelector.SetStartPosition( x, y, moveX, moveY );
 }
 
 void CEditWindow::OnLButUp( LPARAM lParam )
@@ -387,7 +403,17 @@ void CEditWindow::OnLButUp( LPARAM lParam )
 	int y = GET_Y_LPARAM( lParam );
 
 	if( symbolSelector.HasSelection() ) {
-		symbolSelector.SetCurrentPosition( x, y );
+		SCROLLINFO scrollInfo;
+		::ZeroMemory( &scrollInfo, sizeof( SCROLLINFO ) );
+		scrollInfo.cbSize = sizeof( SCROLLINFO );
+		scrollInfo.fMask = SIF_ALL;
+
+		::GetScrollInfo( windowHandle, SB_HORZ, &scrollInfo );
+		int moveX = scrollInfo.nPos * horizontalScrollUnit;
+		::GetScrollInfo( windowHandle, SB_VERT, &scrollInfo );
+		int moveY = scrollInfo.nPos * verticalScrollUnit;
+
+		symbolSelector.SetCurrentPosition( x, y, moveX, moveY );
 	} else {
 		MoveCaretTo( x, y );
 	}
@@ -397,8 +423,17 @@ void CEditWindow::OnLButUp( LPARAM lParam )
 
 void CEditWindow::OnLockedMouseMove( LPARAM lParam )
 {
-	HideCaret();
-	symbolSelector.SetCurrentPosition( GET_X_LPARAM( lParam ), GET_Y_LPARAM( lParam ) );
+	SCROLLINFO scrollInfo;
+	::ZeroMemory( &scrollInfo, sizeof( SCROLLINFO ) );
+	scrollInfo.cbSize = sizeof( SCROLLINFO );
+	scrollInfo.fMask = SIF_ALL;
+
+	::GetScrollInfo( windowHandle, SB_HORZ, &scrollInfo );
+	int moveX = scrollInfo.nPos * horizontalScrollUnit;
+	::GetScrollInfo( windowHandle, SB_VERT, &scrollInfo );
+	int moveY = scrollInfo.nPos * verticalScrollUnit;
+
+	symbolSelector.SetCurrentPosition( GET_X_LPARAM( lParam ), GET_Y_LPARAM( lParam ), moveX, moveY );
 	InvalidateRect( windowHandle, 0, true );
 }
 
@@ -445,49 +480,35 @@ LRESULT __stdcall CEditWindow::windowProcedure( HWND windowHandle, UINT message,
 	return ::DefWindowProc( windowHandle, message, wParam, lParam );
 }
 
-CLineOfSymbols* CEditWindow::isLineBase( CLineOfSymbols& currentBaseLine, int x, int y )
+CLineOfSymbols* CEditWindow::isLineBase( CLineOfSymbols* currentBaseLine, int x, int y )
 {
 	// находим символ, в котором может оказаться очередная подстрока
-	int currentX = currentBaseLine.GetX();
+	int currentX = currentBaseLine->GetX();
 	int symbolIdx = 0;
-	for( ; symbolIdx < currentBaseLine.Length(); ++symbolIdx ) {
-		currentX += currentBaseLine[symbolIdx]->GetWidth();
+	for( ; symbolIdx < currentBaseLine->Length(); ++symbolIdx ) {
+		currentX += (*currentBaseLine)[symbolIdx]->GetWidth();
 		if( currentX >= x ) {
 			break;
 		}
 	}
 	// если символ простой или мы ушли за границу строки, то текущая линия уже является стартовой для выделения
-	if( currentX < x || typeid( *currentBaseLine[symbolIdx] ) == typeid( CSimpleSymbol ) ) {
-		return &currentBaseLine;
+	std::vector<CLineOfSymbols*> substings;
+	// если символ простой или мы ушли за границу строки, то текущая линия уже является стартовой для выделения
+	if( currentX < x || currentBaseLine->Length() == 0) {
+		return currentBaseLine;
 	// иначе в зависимости от типа символа смотрим, не нужно ли перейти на одну из "более внутренних" строк
-	} else if( typeid( *currentBaseLine[symbolIdx] ) == typeid( CFractionSymbol ) ) {
-		CFractionSymbol* tmp = dynamic_cast<CFractionSymbol*>( currentBaseLine[symbolIdx] );
-		if( isLineContainPoint( tmp->GetUpperLine(), x, y ) ) {
-			isLineBase( tmp->GetUpperLine(), x, y );
-		} else if( isLineContainPoint( tmp->GetLowerLine(), x, y ) ) {
-			isLineBase( tmp->GetLowerLine(), x, y );
-		} else {
-			return &currentBaseLine;
-		}
-	} else if( typeid( *currentBaseLine[symbolIdx] ) == typeid( CIndexSymbol ) ) {
-		CIndexSymbol* tmp = dynamic_cast<CIndexSymbol*>( currentBaseLine[symbolIdx] );
-		if( isLineContainPoint( tmp->GetLine(), x, y ) ) {
-			isLineBase( tmp->GetLine(), x, y );
-		} else {
-			return &currentBaseLine;
-		}
-	} else if( typeid( *currentBaseLine[symbolIdx] ) == typeid( CSigmaSymbol ) ) {
-		CSigmaSymbol* tmp = dynamic_cast<CSigmaSymbol*>( currentBaseLine[symbolIdx] );
-		if( isLineContainPoint( tmp->GetUpperLine(), x, y ) ) {
-			isLineBase( tmp->GetUpperLine(), x, y );
-		} else if( isLineContainPoint( tmp->GetLowerLine(), x, y ) ) {
-			isLineBase( tmp->GetLowerLine(), x, y );
-		} else {
-			return &currentBaseLine;
-		}
-	// неопознанный символ - не можем попасть в его подстроки - останавливаемся.
 	} else {
-		return &currentBaseLine;
+		(*currentBaseLine)[symbolIdx]->GetSubstrings( substings );
+		if( substings.size() == 0 ) {
+			return currentBaseLine;
+		} else {
+			for( int i = 0; i < substings.size(); ++i ) {
+				if( isLineContainPoint(substings[i], x, y) ) {
+					return isLineBase( substings[i], x, y );
+				}
+			}
+			return currentBaseLine;
+		}
 	}
 }
 
@@ -745,26 +766,16 @@ void CEditWindow::CCaret::moveToNewCoordinates()
 		newHeight = line->GetHeight();
 	} else if( index == 0 ) {
 		newHeight = ( *line )[index]->GetHeight();
-		x = max( 0, ( *line )[index]->GetX() );
-		y = max( 0, ( *line )[index]->GetY() );
+		x = ( *line )[index]->GetX();
+		y = ( *line )[index]->GetY();
 	} else {
 		newHeight = ( *line )[index - 1]->GetHeight();
-		x = max( 0, ( *line )[index - 1]->GetX() + ( *line )[index - 1]->GetWidth() );
-		y = max( 0, ( *line )[index - 1]->GetY() );
+		x = ( *line )[index - 1]->GetX() + ( *line )[index - 1]->GetWidth();
+		y = ( *line )[index - 1]->GetY();
 	}
 	if( newHeight > 0 && newHeight != height ) {
 		changeHeight( newHeight );
 	}
-
-	SCROLLINFO scrollInfo;
-	::ZeroMemory( &scrollInfo, sizeof( SCROLLINFO ) );
-	scrollInfo.cbSize = sizeof( SCROLLINFO );
-	scrollInfo.fMask = SIF_ALL;
-
-	::GetScrollInfo( window->windowHandle, SB_HORZ, &scrollInfo );
-	x -= scrollInfo.nPos * window->horizontalScrollUnit;
-	::GetScrollInfo( window->windowHandle, SB_HORZ, &scrollInfo );
-	y -= scrollInfo.nPos * window->verticalScrollUnit;
 
 	::SetCaretPos( x, y );
 }

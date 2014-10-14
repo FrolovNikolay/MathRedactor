@@ -136,7 +136,7 @@ private:
 
 	static LRESULT __stdcall windowProcedure( HWND, UINT, WPARAM, LPARAM );
 
-	CLineOfSymbols* isLineBase( CLineOfSymbols& currentBaseLine, int x, int y );
+	CLineOfSymbols* isLineBase( CLineOfSymbols* currentBaseLine, int x, int y );
 
 	void removeSelectedSymbols();
 

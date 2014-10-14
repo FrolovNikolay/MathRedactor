@@ -8,7 +8,7 @@
 #include "IndexSymbol.h"
 #include "SigmaSymbol.h"
 
-CItemSelector::CItemSelector( const std::vector<CLineOfSymbols>& _content ) :
+CItemSelector::CItemSelector( std::vector<CLineOfSymbols>& _content ) :
 	content( _content ),
 	startX( -1 ),
 	startY( -1 ),
@@ -38,20 +38,20 @@ void CItemSelector::ResetSelection()
 	endY = -1;
 }
 
-void CItemSelector::SetStartPosition( int x, int y )
+void CItemSelector::SetStartPosition( int x, int y, int moveX, int moveY )
 {
-	startX = x;
-	startY = y;
-	findBaseLine( x, y );
+	startX = x + moveX;
+	startY = y + moveY;
+	findBaseLine( x, y, moveX, moveY );
 }
 
-void CItemSelector::SetCurrentPosition( int x, int y )
+void CItemSelector::SetCurrentPosition( int x, int y, int moveX, int moveY )
 {
-	endX = x;
-	endY = y;
+	endX = x + moveX;
+	endY = y + moveY;
 }
 
-void CItemSelector::MakeSelection( HDC displayHandle, int width, int height ) const
+void CItemSelector::MakeSelection( HDC displayHandle, int width, int height, int moveX, int moveY ) const
 {
 	// делим на два случая: выделение внутри одной из основных строк, либо мы выделяем внутри сложного символа
 	if( baseLine == 0 ) {
@@ -106,11 +106,11 @@ void CItemSelector::MakeSelection( HDC displayHandle, int width, int height ) co
 		}
 
 		drawSelection( displayHandle, width, height, leftTopX, leftTopY, firstLineHeight, rightBotX,
-			rightBotY, lastLineHeight );
+			rightBotY, lastLineHeight, moveX, moveY );
 	} else {
 		// Определяем начало и конец выделения
-		int startPos = startX;
-		int endPos = endX;
+		int startPos = max( startX + moveX , 0);
+		int endPos = max( endX + moveX, 0 );
 		if( startPos > endPos ) {
 			std::swap( startPos, endPos );
 		}
@@ -149,7 +149,7 @@ void CItemSelector::MakeSelection( HDC displayHandle, int width, int height ) co
 		int rightBotX = (*baseLine)[lastSymbolIdx]->GetX() + (*baseLine)[lastSymbolIdx]->GetWidth();
 		int rightBotY = (*baseLine)[lastSymbolIdx]->GetY() + (*baseLine)[lastSymbolIdx]->GetHeight();
 
-		drawSelection( displayHandle, leftTopX, leftTopY, rightBotX, rightBotY );
+		drawSelection( displayHandle, leftTopX, leftTopY, rightBotX, rightBotY, moveX, moveY );
 	}
 }
 
@@ -196,17 +196,17 @@ void CItemSelector::GetLocalSelectionInfo( CLineOfSymbols*& outBaseLine, int& st
 }
 
 // Определяем базовую подлинию начала выделения во внутренней структуре
-void CItemSelector::findBaseLine( int x, int y )
+void CItemSelector::findBaseLine( int x, int y, int moveX, int moveY )
 {
 	int lineIdx = 0;
 	int symbolIdx = 0;
-	getItemInfo( x, y, lineIdx, symbolIdx );
+	getItemInfo( x + moveX, y + moveY, lineIdx, symbolIdx );
 	// Если выделение начинается за границей существующих строк / символов в строке, то выделяем по всему документу
 	if( lineIdx == content.size() || symbolIdx == -1 ) {
 		baseLine = 0;
 		return;
 	} else {
-		isLineBase( content[lineIdx], x, y );
+		isLineBase( &content[lineIdx], x, y );
 	}
 	// если в итоге во внутренней структуре мы не продвинулись дальше "обычных" строк, то выделяем по всему документу
 	if( baseLine == &content[lineIdx] ) {
@@ -215,55 +215,38 @@ void CItemSelector::findBaseLine( int x, int y )
 }
 
 // рекурсивно проверяем является ли очередная линия итоговой для выделения
-void CItemSelector::isLineBase( const CLineOfSymbols& currentBaseLine, int x, int y )
+void CItemSelector::isLineBase( CLineOfSymbols* currentBaseLine, int x, int y )
 {
 	// находим символ, в котором может оказаться очередная подстрока
-	int currentX = currentBaseLine.GetX();
+	int currentX = currentBaseLine->GetX();
 	int symbolIdx = 0;
-	for( ; symbolIdx < currentBaseLine.Length(); ++symbolIdx ) {
-		currentX += currentBaseLine[symbolIdx]->GetWidth();
+	for( ; symbolIdx < currentBaseLine->Length(); ++symbolIdx ) {
+		currentX += (*currentBaseLine)[symbolIdx]->GetWidth();
 		if( currentX >= x ) {
 			break;
 		}
 	}
+	std::vector<CLineOfSymbols*> substings;
 	// если символ простой или мы ушли за границу строки, то текущая линия уже является стартовой для выделения
-	if( currentX < x || currentBaseLine.Length() == 0
-			|| typeid( *currentBaseLine[symbolIdx] ) == typeid( CSimpleSymbol ) ) {
-		baseLine = &currentBaseLine;
+	if( currentX < x || currentBaseLine ->Length() == 0) {
+		baseLine = currentBaseLine;
 		return;
 	// иначе в зависимости от типа символа смотрим, не нужно ли перейти на одну из "более внутренних" строк
-	} else if( typeid( *currentBaseLine[symbolIdx] ) == typeid( CFractionSymbol ) ) {
-		const CFractionSymbol* tmp = dynamic_cast<const CFractionSymbol*>( currentBaseLine[symbolIdx] );
-		if( isLineContainPoint( tmp->GetUpperLine(), x, y ) ) {
-			isLineBase( tmp->GetUpperLine(), x, y );
-		} else if( isLineContainPoint( tmp->GetLowerLine(), x, y ) ) {
-			isLineBase( tmp->GetLowerLine(), x, y );
-		} else {
-			baseLine = &currentBaseLine;
-			return;
-		}
-	} else if( typeid( *currentBaseLine[symbolIdx] ) == typeid( CIndexSymbol ) ) {
-		const CIndexSymbol* tmp = dynamic_cast<const CIndexSymbol*>( currentBaseLine[symbolIdx] );
-		if( isLineContainPoint( tmp->GetLine(), x, y ) ) {
-			isLineBase( tmp->GetLine(), x, y );
-		} else {
-			baseLine = &currentBaseLine;
-			return;
-		}
-	} else if( typeid( *currentBaseLine[symbolIdx] ) == typeid( CSigmaSymbol ) ) {
-		const CSigmaSymbol* tmp = dynamic_cast<const CSigmaSymbol*>( currentBaseLine[symbolIdx] );
-		if( isLineContainPoint( tmp->GetUpperLine(), x, y ) ) {
-			isLineBase( tmp->GetUpperLine(), x, y );
-		} else if( isLineContainPoint( tmp->GetLowerLine(), x, y ) ) {
-			isLineBase( tmp->GetLowerLine(), x, y );
-		} else {
-			baseLine = &currentBaseLine;
-			return;
-		}
-	// неопознанный символ - не можем попасть в его подстроки - останавливаемся.
 	} else {
-		baseLine = &currentBaseLine;
-		return;
+		(*currentBaseLine)[symbolIdx]->GetSubstrings( substings );
+		if( substings.size() == 0 ) {
+			baseLine = currentBaseLine;
+			return;
+		} else {
+			for( int i = 0; i < substings.size(); ++i ) {
+				if( isLineContainPoint(substings[i], x, y) ) {
+					isLineBase( substings[i], x, y );
+					return;
+				}
+			}
+			baseLine = currentBaseLine;
+			return;
+		}
 	}
 }
 
@@ -294,7 +277,8 @@ void CItemSelector::getItemInfo( int x, int y, int& lineIdx, int& symbolIdx ) co
 }
 
 // выделение во внутренних подстроках по координам первого и посленего символа
-void CItemSelector::drawSelection( HDC displayHandle, int leftTopX, int leftTopY, int rightBotX, int rightBotY) const
+void CItemSelector::drawSelection( HDC displayHandle, int leftTopX, int leftTopY, int rightBotX, int rightBotY,
+	int moveX, int moveY ) const
 {
 	HBRUSH selectionBrush = ::CreateSolidBrush( RGB( 100, 100, 255 ) );
 	HBRUSH lastBrush = static_cast<HBRUSH>( ::SelectObject( displayHandle, selectionBrush ) );
@@ -311,15 +295,24 @@ void CItemSelector::drawSelection( HDC displayHandle, int leftTopX, int leftTopY
 
 // прорисовка выделения для имеющихся в классе start/current позиций
 void CItemSelector::drawSelection( HDC displayHandle, int width, int height, int leftTopX, int leftTopY,
-		int firstLineHeight, int rightBotX, int rightBotY, int lastLineHeight ) const
+		int firstLineHeight, int rightBotX, int rightBotY, int lastLineHeight, int moveX, int moveY ) const
 {
 	HBRUSH selectionBrush = ::CreateSolidBrush( RGB( 100, 100, 255 ) );
 	HBRUSH lastBrush = static_cast<HBRUSH>( ::SelectObject( displayHandle, selectionBrush ) );
 	HPEN newPen = CreatePen( PS_SOLID, 1, RGB( 100, 100, 255 ) );
 	HPEN oldPen = static_cast<HPEN>( ::SelectObject( displayHandle, newPen ) );
 
+	leftTopX = max( 0, leftTopX + moveX );
+	leftTopY = leftTopY + moveY;
+	if( leftTopY <= 0 ) {
+		firstLineHeight = max( 0, firstLineHeight + leftTopY );
+		leftTopY = 0;
+	}
+	rightBotX = max( 0, rightBotX + moveX );
+	rightBotY = max( 0, rightBotY + moveY );
+
 	// вся прорисовка включает в себя три прямоугольника, зависящих от координат первого и последнего символа в выделении
-	if( leftTopX < rightBotX ) {
+	if( leftTopX <= rightBotX ) {
 		::Rectangle( displayHandle, leftTopX, leftTopY, rightBotX, rightBotY );
 		::Rectangle( displayHandle, rightBotX, leftTopY, width, rightBotY - lastLineHeight );
 		::Rectangle( displayHandle, 0, leftTopY + firstLineHeight, leftTopX, rightBotY );

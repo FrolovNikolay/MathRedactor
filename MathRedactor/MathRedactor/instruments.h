@@ -1,6 +1,6 @@
-#pragma once
+п»ї#pragma once
 
 #include "LineOfSymbols.h"
 
-// проверям попадает ли данная точка в данную линию
-bool isLineContainPoint( const CLineOfSymbols& line, int x, int y );
+// РїСЂРѕРІРµСЂСЏРј РїРѕРїР°РґР°РµС‚ Р»Рё РґР°РЅРЅР°СЏ С‚РѕС‡РєР° РІ РґР°РЅРЅСѓСЋ Р»РёРЅРёСЋ
+bool isLineContainPoint( CLineOfSymbols* line, int x, int y );
