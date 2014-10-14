@@ -65,6 +65,8 @@ void CEditWindow::AddSymbol( CSymbol* symbol )
 
 	caret.GetLine()->Push( symbol, caret.GetIndex() );
 	caret.Move( DRight );
+	recalculateHorzScrollParams();
+	recalculateVertScrollParams();
 	::RedrawWindow( windowHandle, 0, 0, RDW_INVALIDATE | RDW_ERASE );
 }
 
@@ -80,7 +82,6 @@ void CEditWindow::AddSign( wchar_t sign )
 	if( isSymbolAllowed( sign ) ) {
 		AddSymbol( new CSimpleSymbol( sign ) );
 	}
-	recalculateHorzScrollParams();
 	::InvalidateRect( windowHandle, 0, true );
 }
 
