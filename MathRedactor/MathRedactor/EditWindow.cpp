@@ -752,6 +752,17 @@ void CEditWindow::CCaret::moveToNewCoordinates()
 	if( newHeight > 0 && newHeight != height ) {
 		changeHeight( newHeight );
 	}
+
+	SCROLLINFO scrollInfo;
+	::ZeroMemory( &scrollInfo, sizeof( SCROLLINFO ) );
+	scrollInfo.cbSize = sizeof( SCROLLINFO );
+	scrollInfo.fMask = SIF_ALL;
+
+	::GetScrollInfo( window->windowHandle, SB_HORZ, &scrollInfo );
+	x -= scrollInfo.nPos * window->horizontalScrollUnit;
+	::GetScrollInfo( window->windowHandle, SB_HORZ, &scrollInfo );
+	y -= scrollInfo.nPos * window->verticalScrollUnit;
+
 	::SetCaretPos( x, y );
 }
 
