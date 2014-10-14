@@ -130,7 +130,7 @@ void CItemSelector::MakeSelection( HDC displayHandle, int width, int height, int
 		}
 		// Координаты левого верхнего угла первого символа
 		int leftTopX = (*baseLine)[startSymbolIdx]->GetX();
-		int leftTopY = (*baseLine)[startSymbolIdx]->GetY();
+		int leftTopY = baseLine->GetY();
 
 		// Аналогично для второго символа
 		currentX = baseLine->GetX();
@@ -147,7 +147,7 @@ void CItemSelector::MakeSelection( HDC displayHandle, int width, int height, int
 		}
 		// Находим координаты правого нижнего угла для последнего символа
 		int rightBotX = (*baseLine)[lastSymbolIdx]->GetX() + (*baseLine)[lastSymbolIdx]->GetWidth();
-		int rightBotY = (*baseLine)[lastSymbolIdx]->GetY() + (*baseLine)[lastSymbolIdx]->GetHeight();
+		int rightBotY = baseLine->GetY() + baseLine->GetHeight();
 
 		drawSelection( displayHandle, leftTopX, leftTopY, rightBotX, rightBotY, moveX, moveY );
 	}
