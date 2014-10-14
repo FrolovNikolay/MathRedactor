@@ -204,12 +204,20 @@ void CEditWindow::OnWmPaint( )
 	if( caretShown ) {
 		caret.Hide();
 	}
+
+	SCROLLINFO scrollInfo;
+	::ZeroMemory( &scrollInfo, sizeof( SCROLLINFO ) );
+	scrollInfo.cbSize = sizeof( SCROLLINFO );
+	scrollInfo.fMask = SIF_ALL;
+
 	PAINTSTRUCT paintInfo;
 	HDC displayHandle = ::BeginPaint( windowHandle, &paintInfo );
 	assert( displayHandle != 0 );
 
-	int posX = 0;
-	int posY = 0;
+	::GetScrollInfo( windowHandle, SB_HORZ, &scrollInfo );
+	int posX = - scrollInfo.nPos * horizontalScrollUnit;
+	::GetScrollInfo( windowHandle, SB_VERT, &scrollInfo );
+	int posY = - scrollInfo.nPos * verticalScrollUnit;
 
 	//Получаем размеры клиентского окна
 	RECT clientRect;
@@ -302,6 +310,7 @@ void CEditWindow::OnWmHScroll( WPARAM wParam, LPARAM lParam )
 		// запоминаем и устанавливаем новую позицию скролла
 		int scrollPosition = scrollInfo.nPos;
 		scrollInfo.fMask = SIF_POS;
+		::RedrawWindow( windowHandle, 0, 0, RDW_INVALIDATE );
 		::SetScrollInfo( windowHandle, SB_HORZ, &scrollInfo, TRUE );
 		// и перестраховка, на случай того, что Window сдвинет что-то не так, как ожидалось
 		::GetScrollInfo( windowHandle, SB_HORZ, &scrollInfo );
@@ -339,7 +348,9 @@ void CEditWindow::OnWmVScroll( WPARAM wParam, LPARAM lParam )
 		// запоминаем и устанавливаем новую позицию скролла
 		int scrollPosition = scrollInfo.nPos;
 		scrollInfo.fMask = SIF_POS;
+		::RedrawWindow( windowHandle, 0, 0, RDW_INVALIDATE );
 		::SetScrollInfo( windowHandle, SB_VERT, &scrollInfo, TRUE );
+
 		// и перестраховка, на случай того, что Window сдвинет что-то не так, как ожидалось
 		::GetScrollInfo( windowHandle, SB_VERT, &scrollInfo );
 		if( scrollInfo.nPos != scrollPosition ) {
