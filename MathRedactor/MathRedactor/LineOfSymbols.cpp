@@ -94,8 +94,9 @@ void CLineOfSymbols::Draw( HDC displayHandle, int posX, int posY ) const
 	width = posX - x;
 
 	if( width == 0 ) {
-		::GetObject( font, sizeof( LOGFONT ), &fontInfo );
-		width = fontInfo.lfWidth;
+		TEXTMETRIC textMetric;
+		::GetTextMetrics( displayHandle, &textMetric );
+		width = textMetric.tmAveCharWidth;
 	}
 
 	//Возвращаем старый шрифт, удаляем созданный
@@ -123,8 +124,9 @@ int CLineOfSymbols::CalculateWidth( HDC displayHandle ) const
 	}
 
 	if( result == 0 ) {
-		::GetObject( font, sizeof( LOGFONT ), &fontInfo );
-		result = fontInfo.lfWidth;
+		TEXTMETRIC textMetric;
+		::GetTextMetrics( displayHandle, &textMetric );
+		result = textMetric.tmAveCharWidth;
 	}
 
 	//Возвращаем старый шрифт, удаляем созданный
