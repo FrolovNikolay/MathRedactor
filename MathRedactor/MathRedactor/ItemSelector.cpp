@@ -23,7 +23,7 @@ CItemSelector::~CItemSelector()
 
 bool CItemSelector::HasSelection() const
 {
-	if( endX == -1 && endY == -1 ) {
+	if(( endX == -1 && endY == -1 )|| ( baseLine != 0 && baseLine->Length() == 0 ) ) {
 		return false;
 	} else {
 		return true;
