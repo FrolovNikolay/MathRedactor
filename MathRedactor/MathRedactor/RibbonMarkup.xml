@@ -80,12 +80,12 @@
     <Ribbon>
       <Ribbon.Tabs>
         <Tab CommandName="cmdTabSymbols">
-          <Group CommandName="cmdGroupSetOperations">
+          <Group CommandName="cmdGroupSetOperations" SizeDefinition="ThreeButtons">
             <Button CommandName="cmdButtonSigma" />
             <Button CommandName="cmdButtonPiMult" />
             <Button CommandName="cmdButtonSqrt" />
           </Group>
-          <Group CommandName="cmdGroupNumberOperations">
+          <Group CommandName="cmdGroupNumberOperations" SizeDefinition="ThreeButtons">
             <Button CommandName="cmdButtonFraction" />
             <Button CommandName="cmdButtonUpperIndex" />
             <Button CommandName="cmdButtonLowerIndex" />

@@ -5,11 +5,18 @@
 #include "Symbol.h"
 #include "LineOfSymbols.h" 
 
-//Сложный символ "сигма". Состоит из двух строк (верхней и нижней)
+// Большие символы сигма и пи которые испоьзуются для суммы и произведения
+const wchar_t bigSigmaSymbol = L'\u2211';
+const wchar_t bigPiSymbol = L'\u220F';
+
+////////////////////////////////////////////////////////////////////////
+// Сложный символ "сигма"(который может представлять не только сумму). Состоит из двух строк (верхней и нижней)
+
 class CSigmaSymbol : public CSymbol {
 public:
 
-	CSigmaSymbol( int simpleSymbolHeight );
+	// В параметрах конструктора передается символ который надо будет отображать
+	CSigmaSymbol( int simpleSymbolHeight, const wchar_t symbolForDawing );
 
 	//Создание копии (deep) объекта. 
 	virtual CSymbol* Clone( CLineOfSymbols* parent ) const;
@@ -36,7 +43,7 @@ private:
 	CLineOfSymbols lowerLine;
 
 	//Символ сигмы для TextOut
-	static const wchar_t symbol[];
+	wchar_t symbol[2];
 
 	//Рассчитать высоту нижней и верхней строки
 	static int calculateSublineHeight( int simpleSymbolHeight ) 

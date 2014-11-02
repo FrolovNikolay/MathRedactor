@@ -50,7 +50,7 @@ STDMETHODIMP CCommandHandler::Execute( UINT nCmdId, UI_EXECUTIONVERB verb, const
 	switch( nCmdId ) {
 	case ID_CMD_SIGMA:
 	{
-		CSigmaSymbol* sigma = new CSigmaSymbol( editWindow->GetCaretLine()->GetSimpleSymbolHeight() );
+		CSigmaSymbol* sigma = new CSigmaSymbol( editWindow->GetCaretLine()->GetSimpleSymbolHeight(), bigSigmaSymbol );
 		sigma->GetUpperLine().Push( new CSimpleSymbol( L'9' ), 0 );
 		sigma->GetLowerLine().Push( new CSimpleSymbol( L'1' ), 0 );
 		editWindow->AddSymbol( sigma );
@@ -58,10 +58,10 @@ STDMETHODIMP CCommandHandler::Execute( UINT nCmdId, UI_EXECUTIONVERB verb, const
 	}
 	case ID_CMD_PIMUL:
 	{
-		CSigmaSymbol* sigma = new CSigmaSymbol(editWindow->GetCaretLine()->GetSimpleSymbolHeight());
-		sigma->GetUpperLine().Push(new CSimpleSymbol(L'9'), 0);
-		sigma->GetLowerLine().Push(new CSimpleSymbol(L'1'), 0);
-		editWindow->AddSymbol(sigma);
+		CSigmaSymbol* sigma = new CSigmaSymbol( editWindow->GetCaretLine()->GetSimpleSymbolHeight(), bigPiSymbol );
+		sigma->GetUpperLine().Push( new CSimpleSymbol( L'9' ), 0 );
+		sigma->GetLowerLine().Push( new CSimpleSymbol( L'1' ), 0 );
+		editWindow->AddSymbol( sigma );
 		break;
 	}
 	case ID_CMD_FRACTION:
