@@ -104,6 +104,7 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="Res\fraction.bmp" />
+    <Image Include="Res\func.bmp" />
     <Image Include="Res\lowerIndex.bmp" />
     <Image Include="Res\pi_for_mult.bmp" />
     <Image Include="Res\sigma.bmp" />

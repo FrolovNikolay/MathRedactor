@@ -47,28 +47,28 @@
              Symbol="ID_CMD_SIN"
              LabelTitle="Синус">
       <Command.LargeImages>
-        <Image>Res\sqrt.bmp</Image>
+        <Image>Res\func.bmp</Image>
       </Command.LargeImages>
     </Command>
     <Command Name="cmdButtonCos"
              Symbol="ID_CMD_COS"
              LabelTitle="Косинус">
       <Command.LargeImages>
-        <Image>Res\sqrt.bmp</Image>
+        <Image>Res\func.bmp</Image>
       </Command.LargeImages>
     </Command>
     <Command Name="cmdButtonTan"
              Symbol="ID_CMD_TAN"
              LabelTitle="Тангенс">
       <Command.LargeImages>
-        <Image>Res\sqrt.bmp</Image>
+        <Image>Res\func.bmp</Image>
       </Command.LargeImages>
     </Command>
     <Command Name="cmdButtonCtg"
              Symbol="ID_CMD_CTG"
              LabelTitle="Котангенс">
       <Command.LargeImages>
-        <Image>Res\sqrt.bmp</Image>
+        <Image>Res\func.bmp</Image>
       </Command.LargeImages>
     </Command>
     <Command Name="cmdTabSymbols" LabelTitle="Символы" />
