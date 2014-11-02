@@ -56,6 +56,14 @@ STDMETHODIMP CCommandHandler::Execute( UINT nCmdId, UI_EXECUTIONVERB verb, const
 		editWindow->AddSymbol( sigma );
 		break;
 	}
+	case ID_CMD_PIMUL:
+	{
+		CSigmaSymbol* sigma = new CSigmaSymbol(editWindow->GetCaretLine()->GetSimpleSymbolHeight());
+		sigma->GetUpperLine().Push(new CSimpleSymbol(L'9'), 0);
+		sigma->GetLowerLine().Push(new CSimpleSymbol(L'1'), 0);
+		editWindow->AddSymbol(sigma);
+		break;
+	}
 	case ID_CMD_FRACTION:
 	{
 		CFractionSymbol* fraction = new CFractionSymbol( editWindow->GetCaretLine()->GetSimpleSymbolHeight() );

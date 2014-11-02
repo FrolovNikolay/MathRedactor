@@ -94,7 +94,10 @@
     <ClInclude Include="IndexSymbol.h" />
   </ItemGroup>
   <ItemGroup>
-    <Xml Include="RibbonMarkup.xml" />
+    <CustomBuild Include="RibbonMarkup.xml">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">uicc.exe "RibbonMarkup.xml" Ribbon.bml /header:RibbonIDs.h /res:RibbonResource.rc</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Ribbon.bml;RibbonIDs.h;RibbonResource.rc</Outputs>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="RibbonResource.rc" />
@@ -102,12 +105,13 @@
   <ItemGroup>
     <Image Include="Res\fraction.bmp" />
     <Image Include="Res\lowerIndex.bmp" />
+    <Image Include="Res\pi_for_mult.bmp" />
     <Image Include="Res\sigma.bmp" />
     <Image Include="Res\sqrt.bmp" />
     <Image Include="Res\upperIndex.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="RibbonUI.bin" />
+    <None Include="Ribbon.bml" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

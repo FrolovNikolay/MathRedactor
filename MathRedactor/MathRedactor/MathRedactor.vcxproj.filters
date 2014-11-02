@@ -97,9 +97,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Xml Include="RibbonMarkup.xml" />
-  </ItemGroup>
-  <ItemGroup>
     <ResourceCompile Include="RibbonResource.rc">
       <Filter>Файлы ресурсов</Filter>
     </ResourceCompile>
@@ -120,9 +117,15 @@
     <Image Include="Res\sqrt.bmp">
       <Filter>Файлы ресурсов</Filter>
     </Image>
+    <Image Include="Res\pi_for_mult.bmp">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
-    <None Include="RibbonUI.bin">
+    <CustomBuild Include="RibbonMarkup.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Ribbon.bml">
       <Filter>Файлы ресурсов</Filter>
     </None>
   </ItemGroup>
