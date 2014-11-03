@@ -7,6 +7,7 @@
 #include "RootSymbol.h"
 #include "CommandHandler.h"
 #include "RibbonIDs.h"
+#include "FunctionSymbol.h"
 
 CCommandHandler::CCommandHandler( CEditWindow* _editWindow) {
 	editWindow = _editWindow;
@@ -99,13 +100,33 @@ STDMETHODIMP CCommandHandler::Execute( UINT nCmdId, UI_EXECUTIONVERB verb, const
 			break;
 		}
 		case ID_CMD_SIN:
+		{
+			CFunctionSymbol *func = new CFunctionSymbol( editWindow->GetCaretLine()->GetSimpleSymbolHeight(), L"sin" );
+			func->GetArgumentLine().PushBack( new CSimpleSymbol( L'x' ) );
+			editWindow->AddSymbol( func );
 			break;
+		}
 		case ID_CMD_COS:
+		{
+			CFunctionSymbol *func = new CFunctionSymbol( editWindow->GetCaretLine()->GetSimpleSymbolHeight(), L"cos" );
+			func->GetArgumentLine().PushBack( new CSimpleSymbol( L'x' ) );
+			editWindow->AddSymbol( func );
 			break;
+		}
 		case ID_CMD_TAN:
+		{
+			CFunctionSymbol *func = new CFunctionSymbol( editWindow->GetCaretLine()->GetSimpleSymbolHeight(), L"tan" );
+			func->GetArgumentLine().PushBack( new CSimpleSymbol( L'x' ) );
+			editWindow->AddSymbol( func );
 			break;
+		}
 		case ID_CMD_CTG:
+		{
+			CFunctionSymbol *func = new CFunctionSymbol( editWindow->GetCaretLine()->GetSimpleSymbolHeight(), L"ctg" );
+			func->GetArgumentLine().PushBack( new CSimpleSymbol( L'x' ) );
+			editWindow->AddSymbol( func );
 			break;
+		}
 	}
 
 	return S_OK;
