@@ -47,6 +47,7 @@ public:
 	// Двигает каретку к данной точке
 	void MoveCaretTo( int x, int y );
 
+
 protected:
 	// метод, вызываемый при получении окном сообщения WM_DESTROY
 	void OnWmDestroy();

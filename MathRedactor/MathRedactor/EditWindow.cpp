@@ -141,7 +141,21 @@ void CEditWindow::HideCaret()
 
 void CEditWindow::MoveCaret( CEditWindow::TDirection direction )
 {
+	
 	caret.Move( direction );
+	if( symbolSelector.HasSelection() ) {
+		int begin, end;
+		CLineOfSymbols* newLine = caret.GetLine();
+		symbolSelector.GetLocalSelectionInfo( newLine, begin, end );
+		symbolSelector.ResetSelection();
+		if( direction == TDirection::DRight || direction == TDirection::DDown ) {
+			caret.MoveTo( newLine, end );
+		} else {
+			caret.MoveTo( newLine, begin );
+		}
+		::InvalidateRect( windowHandle, 0, true );
+	}
+	
 }
 
 void CEditWindow::MoveCaretTo( int x, int y )
@@ -198,6 +212,8 @@ void CEditWindow::MoveCaretTo( int x, int y )
 	}
 	caret.MoveTo( baseLine, symbolIdx );
 }
+
+
 
 // protected методы
 
