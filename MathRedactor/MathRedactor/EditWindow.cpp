@@ -7,6 +7,7 @@
 #include "instruments.h"
 #include <assert.h>
 #include <windowsx.h>
+#include "SymbolPosition.h"
 
 // класс CEditWindow
 // константы
@@ -15,17 +16,17 @@ const wchar_t* CEditWindow::className = L"MathRedactorEditWindowClass";
 
 // public методы
 
-CEditWindow::CEditWindow() : horizontalScrollUnit( 30 ), verticalScrollUnit( 15 ), simpleSymbolHeight( 50 ),
-		caret( this ), symbolSelector( content )
+CEditWindow::CEditWindow() 
+		: horizontalScrollUnit( 30 )
+		, verticalScrollUnit( 15 )
+		, simpleSymbolHeight( 50 )
+		, content( 1, CLineOfSymbols( simpleSymbolHeight ) )
+		, caret( this, &content[0] )
+		, finder( content )
+		, symbolSelector( finder, content )
+		, drawer( content, symbolSelector, horizontalScrollUnit, verticalScrollUnit, simpleSymbolHeight )
 {
 	windowHandle = 0;
-	
-	content.push_back( CLineOfSymbols( simpleSymbolHeight ) );
-	caret.MoveTo( &content[0], 0 );
-}
-
-CEditWindow::~CEditWindow()
-{
 }
 
 bool CEditWindow::RegisterClass( HINSTANCE classOwnerInstance )
@@ -57,14 +58,22 @@ void CEditWindow::Show( int nCmdShow )
 
 void CEditWindow::AddSymbol( CSymbol* symbol )
 {
-	std::vector<CLineOfSymbols*> substrings;
-	symbol->GetSubstrings( substrings );
-	for( int i = 0; i < substrings.size(); ++i ) {
-		substrings[i]->SetParent( caret.GetLine() );
+	if( symbolSelector.HasSelection() ) {
+		removeSelectedItems();
+		symbolSelector.ResetSelection();
+		ShowCaret();
 	}
 
-	caret.GetLine()->Push( symbol, caret.GetIndex() );
-	caret.Move( DRight );
+	std::vector<CLineOfSymbols*> substrings;
+	symbol->GetSubstrings( substrings );
+
+	CLineOfSymbols* currentLine = GetCaretLine();
+
+	for( int i = 0; i < static_cast<int>( substrings.size() ); ++i ) {
+		substrings[i]->SetParent( currentLine );
+	}
+	currentLine->Insert( caret.GetIndex(), symbol );
+	caret.Move( CD_Right );
 	recalculateHorzScrollParams();
 	recalculateVertScrollParams();
 	::RedrawWindow( windowHandle, 0, 0, RDW_INVALIDATE | RDW_ERASE );
@@ -72,56 +81,64 @@ void CEditWindow::AddSymbol( CSymbol* symbol )
 
 void CEditWindow::AddSign( wchar_t sign )
 {
-	if( symbolSelector.HasSelection() ) {
-		removeSelectedSymbols();
-		symbolSelector.ResetSelection();
-		if( !caret.IsShown() ) {
-			ShowCaret();
-		}
-	}
 	if( isSymbolAllowed( sign ) ) {
 		AddSymbol( new CSimpleSymbol( sign ) );
 	}
+	ShowCaret();
 	::InvalidateRect( windowHandle, 0, true );
 }
 
 void CEditWindow::RemoveSign()
 {
-	if( caret.GetIndex() > 0 ) {
-		caret.GetLine()->Pop( caret.GetIndex() - 1 );
-		caret.Move( DLeft );
-	} else if( getBaseLineIndex( caret.GetLine() ) > 0 ) {
-		int lineIndex = getBaseLineIndex( caret.GetLine() );
-		int pos = content[lineIndex - 1].Length();
-		for( int i = 0; i < content[lineIndex].Length(); ++i ) {
-			content[lineIndex - 1].Push( content[lineIndex][i]->Clone( &content[lineIndex - 1] ), 
-				content[lineIndex - 1].Length() );
+	if( symbolSelector.HasSelection() ) {
+		removeSelectedItems();
+		symbolSelector.ResetSelection();
+		ShowCaret();
+	} else {
+		CLineOfSymbols* currentLine = GetCaretLine();
+		if( caret.GetIndex() > 0 ) {
+			currentLine->Delete( caret.GetIndex() - 1 );
+			caret.Move( CD_Left );
+		} else if( getBaseLineIndex( currentLine ) > 0 ) {
+			int lineIndex = getBaseLineIndex( currentLine );
+			int pos = content[lineIndex - 1].Length();
+			for( int i = 0; i < content[lineIndex].Length(); ++i ) {
+				content[lineIndex - 1].PushBack( content[lineIndex][i]->Clone( &content[lineIndex - 1] ) );
+			}
+			content.erase( content.begin() + lineIndex );
+			caret.MoveTo( CSymbolPosition( pos, &content[lineIndex - 1] ) );
+			recalculateVertScrollParams();
 		}
-		content.erase( content.begin() + lineIndex );
-		caret.MoveTo( &content[lineIndex - 1], pos );
-		recalculateVertScrollParams();
+		currentLine->Recalculate();
+		recalculateHorzScrollParams();
+		::RedrawWindow( windowHandle, 0, 0, RDW_INVALIDATE );
 	}
-	recalculateHorzScrollParams();
-	::RedrawWindow( windowHandle, 0, 0, RDW_INVALIDATE );
 }
 
 void CEditWindow::NewLine()
 {
-	int lineIndex = getBaseLineIndex( caret.GetLine() );
+	if( symbolSelector.HasSelection() ) {
+		removeSelectedItems();
+		symbolSelector.ResetSelection();
+		ShowCaret();
+	}
+
+	CLineOfSymbols* currentLine = GetCaretLine();
+
+	int lineIndex = getBaseLineIndex( currentLine );
 	if( lineIndex != -1 ) {
 		if( lineIndex == content.size() - 1 ) {
-			content.push_back( CLineOfSymbols( simpleSymbolHeight ) );
+			content.push_back( CLineOfSymbols( simpleSymbolHeight, true ) );
 		} else {
-			content.insert( content.begin() + lineIndex + 1, 1, CLineOfSymbols( simpleSymbolHeight ) );
+			content.insert( content.begin() + lineIndex + 1, CLineOfSymbols( simpleSymbolHeight, true ) );
 		}
 		for( int i = caret.GetIndex(); i < content[lineIndex].Length(); ++i ) {
-			content[lineIndex + 1].Push( content[lineIndex][i]->Clone( &content[lineIndex + 1] ),
-				i - caret.GetIndex() );
+			content[lineIndex + 1].Insert( i - caret.GetIndex(), content[lineIndex][i]->Clone( &content[lineIndex + 1] ) );
 		}
 		for( int i = content[lineIndex].Length() - 1; i >= caret.GetIndex(); --i ) {
-			content[lineIndex].Pop( i );
+			content[lineIndex].Delete( i );
 		}
-		caret.MoveTo( &content[lineIndex + 1], 0 );
+		caret.MoveTo( CSymbolPosition( 0, &content[lineIndex + 1] ) );
 		recalculateVertScrollParams();
 		::RedrawWindow( windowHandle, 0, 0, RDW_INVALIDATE );
 	}
@@ -129,91 +146,37 @@ void CEditWindow::NewLine()
 
 void CEditWindow::ShowCaret()
 {
-	caret.Create();
-	caret.Show();
+	if( !caret.IsShown() ) {
+		caret.Create();
+		caret.Show();
+	}
 }
 
 void CEditWindow::HideCaret()
 {
-	caret.Hide();
-	caret.Destroy();
+	if( caret.IsShown() ) {
+		caret.Hide();
+		caret.Destroy();
+	}
 }
 
-void CEditWindow::MoveCaret( CEditWindow::TDirection direction )
+void CEditWindow::MoveCaret( CEditWindow::TCaretDirection direction )
 {
-	
-	caret.Move( direction );
 	if( symbolSelector.HasSelection() ) {
-		int begin, end;
-		CLineOfSymbols* newLine = caret.GetLine();
-		symbolSelector.GetLocalSelectionInfo( newLine, begin, end );
-		symbolSelector.ResetSelection();
-		if( direction == TDirection::DRight || direction == TDirection::DDown ) {
-			caret.MoveTo( newLine, end );
+		if( direction == CD_Left || direction == CD_Up ) {
+			caret.MoveTo( symbolSelector.GetSelectionInfo().first );
 		} else {
-			caret.MoveTo( newLine, begin );
+			caret.MoveTo( symbolSelector.GetSelectionInfo().second );
+			caret.Move( CD_Right );
 		}
-		::InvalidateRect( windowHandle, 0, true );
-	}
-	
-}
-
-void CEditWindow::MoveCaretTo( int x, int y )
-{
-	SCROLLINFO scrollInfo;
-	::ZeroMemory( &scrollInfo, sizeof( SCROLLINFO ) );
-	scrollInfo.cbSize = sizeof( SCROLLINFO );
-	scrollInfo.fMask = SIF_ALL;
-
-	::GetScrollInfo( windowHandle, SB_HORZ, &scrollInfo );
-	int movedX = scrollInfo.nPos * horizontalScrollUnit + x;
-	::GetScrollInfo( windowHandle, SB_VERT, &scrollInfo );
-	int movedY = scrollInfo.nPos * verticalScrollUnit + y;
-	int lineIdx = 0;
-	int symbolIdx = 0;
-
-	int currentY = 0;
-	for( lineIdx = 0; lineIdx < content.size(); ++lineIdx ) {
-		currentY += content[lineIdx].GetHeight();
-		if( currentY >= movedY ) {
-			break;
-		}
-	}
-	if( currentY < movedY ) {
-		caret.MoveTo( &content[content.size() - 1], content[content.size() - 1].Length() );
-		return;
-	}
-	int currentX = 0;
-	for( symbolIdx = 0; symbolIdx < content[lineIdx].Length(); ++symbolIdx ) {
-		currentX += content[lineIdx][symbolIdx]->GetWidth();
-		if( currentX >= movedX ) {
-			break;
-		} 
-	}
-
-	CLineOfSymbols* baseLine;
-
-	// Если выделение начинается за границей существующих строк / символов в строке, то выделяем по всему документу
-	if( lineIdx == content.size() ) {
-		baseLine = &content[--lineIdx];
+		symbolSelector.ResetSelection();
+		ShowCaret();
 	} else {
-		baseLine = isLineBase( &content[lineIdx], x, y );
+		caret.Move( direction );
 	}
-	if( baseLine->Length() == 0 ) {
-		symbolIdx = -1;
-	} else {
-		currentX = baseLine->GetX();
-		for( symbolIdx = 0; symbolIdx < baseLine->Length(); ++symbolIdx ) {
-			currentX += (*baseLine)[symbolIdx]->GetWidth();
-			if( currentX > x ) {
-				break;
-			}
-		}
-	}
-	caret.MoveTo( baseLine, symbolIdx );
+	ShowCaret();
+	::InvalidateRect( windowHandle, 0, true );
 }
-
-
 
 // protected методы
 
@@ -221,86 +184,14 @@ void CEditWindow::OnWmDestroy() {
 	::PostQuitMessage( 0 );
 }
 
-//TODO: Сделать нормальный метод
-void CEditWindow::OnWmPaint( )
+void CEditWindow::OnWmPaint()
 {
 	// мы запоминаем состояние каретки до перерисовки
 	bool caretShown = caret.IsShown();
 	if( caretShown ) {
 		caret.Hide();
 	}
-
-	PAINTSTRUCT paintInfo;
-	HDC displayHandle = ::BeginPaint( windowHandle, &paintInfo );
-	assert( displayHandle != 0 );
-
-	SCROLLINFO scrollInfo;
-	::ZeroMemory( &scrollInfo, sizeof( SCROLLINFO ) );
-	scrollInfo.cbSize = sizeof( SCROLLINFO );
-	scrollInfo.fMask = SIF_ALL;
-
-	::GetScrollInfo( windowHandle, SB_HORZ, &scrollInfo );
-	int posX = - scrollInfo.nPos * horizontalScrollUnit;
-	::GetScrollInfo( windowHandle, SB_VERT, &scrollInfo );
-	int posY = - scrollInfo.nPos * verticalScrollUnit;
-
-	//Получаем размеры клиентского окна
-	RECT clientRect;
-	::GetClientRect( windowHandle, &clientRect );
-
-	int width = clientRect.right;
-	int height = clientRect.bottom;
-
-	HDC memDC = CreateCompatibleDC( displayHandle );
-	HBITMAP bitmap = CreateCompatibleBitmap( displayHandle, width, height );
-	HBITMAP oldBitmap = reinterpret_cast<HBITMAP>( ::SelectObject( memDC, bitmap ) );
-
-	//Фон
-	HBRUSH bgBrush = ::CreateSolidBrush( RGB( 255, 255, 255 ) );
-	HBRUSH oldBgBrush = (HBRUSH) ::SelectObject( memDC, bgBrush );
-	::Rectangle( memDC, 0, 0, width, height );
-	::SelectObject( memDC, oldBgBrush );
-	::DeleteObject( bgBrush );
-
-	//!!!Сделать настройку шрифта отдельно
-	HFONT font = ::CreateFont( simpleSymbolHeight, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_DEFAULT_PRECIS,
-		CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"Georgia" );
-	assert( font != 0 );
-
-	if( symbolSelector.HasSelection() ) {
-		symbolSelector.MakeSelection( memDC, width, height, posX, posY );
-	}
-
-	HFONT oldFont = (HFONT) ::SelectObject( memDC, font );
-
-	//Настройка кисти для линии (рисование дроби)
-	HPEN linePen = ::CreatePen( PS_SOLID, 1, RGB( 0, 0, 0 ) );
-	HPEN oldLinePen = (HPEN) ::SelectObject( memDC, linePen );
-
-	//Выравнивание для TextOut (левый верхний угол)
-	::SetTextAlign( memDC, TA_LEFT | TA_TOP );
-	// Фон текста прозрачный, для выделения
-	::SetBkMode( memDC, TRANSPARENT );
-
-	for( int i = 0; i < content.size( ); ++i ) {
-		content[i].Draw( memDC, posX, posY );
-		posY += content[i].GetHeight();
-	}
-
-	::SelectObject( memDC, oldLinePen );
-	::DeleteObject( linePen );
-
-	::SelectObject( memDC, oldFont );
-	::DeleteObject( font );
-	
-	::SetBkMode( memDC, OPAQUE );
-
-	::BitBlt( displayHandle, 0, 0, width, height, memDC, 0, 0, SRCCOPY);
-	::DeleteObject( oldBitmap );
-	::DeleteObject( bitmap );
-	::DeleteDC( memDC );
-
-	::EndPaint( windowHandle, &paintInfo );
+	drawer.RePaint( windowHandle );
 	// если каретка показывалась до перерисовки, то отображаем ее
 	if( caretShown ) {
 		caret.Show();
@@ -323,10 +214,10 @@ void CEditWindow::OnWmHScroll( WPARAM wParam, LPARAM lParam )
 			scrollInfo.nPos = min( scrollInfo.nPos + 1, scrollInfo.nMax );
 			break;
 		case SB_PAGELEFT:
-			scrollInfo.nPos = max( scrollInfo.nPos - scrollInfo.nPage, scrollInfo.nMin );
+			scrollInfo.nPos = max( scrollInfo.nPos - static_cast<int>( scrollInfo.nPage ), scrollInfo.nMin );
 			break;
 		case SB_PAGERIGHT:
-			scrollInfo.nPos = min( scrollInfo.nPos + scrollInfo.nPage, scrollInfo.nMax );
+			scrollInfo.nPos = min( scrollInfo.nPos + static_cast<int>( scrollInfo.nPage ), scrollInfo.nMax );
 			break;
 		case SB_THUMBTRACK:
 			scrollInfo.nPos = scrollInfo.nTrackPos;
@@ -361,10 +252,10 @@ void CEditWindow::OnWmVScroll( WPARAM wParam, LPARAM lParam )
 			scrollInfo.nPos = min( scrollInfo.nPos + 1, scrollInfo.nMax );
 			break;
 		case SB_PAGEUP:
-			scrollInfo.nPos = max( scrollInfo.nPos - scrollInfo.nPage, scrollInfo.nMin );
+			scrollInfo.nPos = max( scrollInfo.nPos - static_cast<int>( scrollInfo.nPage ), scrollInfo.nMin );
 			break;
 		case SB_PAGEDOWN:
-			scrollInfo.nPos = min( scrollInfo.nPos + scrollInfo.nPage, scrollInfo.nMax );
+			scrollInfo.nPos = min( scrollInfo.nPos + static_cast<int>( scrollInfo.nPage ), scrollInfo.nMax );
 			break;
 		case SB_THUMBTRACK:
 			scrollInfo.nPos = scrollInfo.nTrackPos;
@@ -405,12 +296,10 @@ void CEditWindow::OnLButDown( LPARAM lParam )
 	int x = GET_X_LPARAM( lParam );
 	int y = GET_Y_LPARAM( lParam );
 
-	MoveCaretTo( x, y );
+	caret.MoveTo( x + moveX, y + moveY );
 	symbolSelector.ResetSelection();
-	if( !caret.IsShown() ) {
-		ShowCaret();
-	}
-	symbolSelector.SetStartPosition( x, y, moveX, moveY );
+	symbolSelector.SetStartPosition( x + moveX, y + moveY );
+	HideCaret();
 }
 
 void CEditWindow::OnLButUp( LPARAM lParam )
@@ -429,16 +318,20 @@ void CEditWindow::OnLButUp( LPARAM lParam )
 		::GetScrollInfo( windowHandle, SB_VERT, &scrollInfo );
 		int moveY = scrollInfo.nPos * verticalScrollUnit;
 
-		symbolSelector.SetCurrentPosition( x, y, moveX, moveY );
+		symbolSelector.SetCurrentPosition( x + moveX, y + moveY );
 	} else {
-		MoveCaretTo( x, y );
+		ShowCaret();
 	}
-	
 	InvalidateRect( windowHandle, 0, true );
 }
 
 void CEditWindow::OnLockedMouseMove( LPARAM lParam )
 {
+	if( symbolSelector.HasSelection() ) {
+		HideCaret();
+	} else {
+		ShowCaret();
+	}
 	SCROLLINFO scrollInfo;
 	::ZeroMemory( &scrollInfo, sizeof( SCROLLINFO ) );
 	scrollInfo.cbSize = sizeof( SCROLLINFO );
@@ -448,13 +341,11 @@ void CEditWindow::OnLockedMouseMove( LPARAM lParam )
 	int moveX = scrollInfo.nPos * horizontalScrollUnit;
 	::GetScrollInfo( windowHandle, SB_VERT, &scrollInfo );
 	int moveY = scrollInfo.nPos * verticalScrollUnit;
-
-	symbolSelector.SetCurrentPosition( GET_X_LPARAM( lParam ), GET_Y_LPARAM( lParam ), moveX, moveY );
+	symbolSelector.SetCurrentPosition( GET_X_LPARAM( lParam ) + moveX, GET_Y_LPARAM( lParam ) + moveY );
 	InvalidateRect( windowHandle, 0, true );
 }
 
 // private методы
-
 // процедура обрабатывающая сообщения для окна редактора
 LRESULT __stdcall CEditWindow::windowProcedure( HWND windowHandle, UINT message, WPARAM wParam, LPARAM lParam )
 {
@@ -492,79 +383,52 @@ LRESULT __stdcall CEditWindow::windowProcedure( HWND windowHandle, UINT message,
 		window->OnLButUp( lParam );
 		break;
 	}
-
 	return ::DefWindowProc( windowHandle, message, wParam, lParam );
+
 }
 
-CLineOfSymbols* CEditWindow::isLineBase( CLineOfSymbols* currentBaseLine, int x, int y )
+void CEditWindow::removeSelectedItems()
 {
-	// находим символ, в котором может оказаться очередная подстрока
-	int currentX = currentBaseLine->GetX();
-	int symbolIdx = 0;
-	for( ; symbolIdx < currentBaseLine->Length(); ++symbolIdx ) {
-		currentX += (*currentBaseLine)[symbolIdx]->GetWidth();
-		if( currentX >= x ) {
-			break;
-		}
-	}
-	// если символ простой или мы ушли за границу строки, то текущая линия уже является стартовой для выделения
-	std::vector<CLineOfSymbols*> substings;
-	// если символ простой или мы ушли за границу строки, то текущая линия уже является стартовой для выделения
-	if( currentX < x || currentBaseLine->Length() == 0) {
-		return currentBaseLine;
-	// иначе в зависимости от типа символа смотрим, не нужно ли перейти на одну из "более внутренних" строк
-	} else {
-		(*currentBaseLine)[symbolIdx]->GetSubstrings( substings );
-		if( substings.size() == 0 ) {
-			return currentBaseLine;
+	CItemSelector::CSymbolInterval interval = symbolSelector.GetSelectionInfo();
+	CSymbolPosition start = interval.first;
+	CSymbolPosition end = interval.second;
+	if( start.Index != -1 && end.Index != -1 ) {
+		if( start.GetParent() != 0 ) {
+			removeLocalSelected( start, end );
 		} else {
-			for( int i = 0; i < substings.size(); ++i ) {
-				if( isLineContainPoint(substings[i], x, y) ) {
-					return isLineBase( substings[i], x, y );
-				}
-			}
-			return currentBaseLine;
+			removeGlobalSelected( start, end );
 		}
 	}
 }
 
-void CEditWindow::removeSelectedSymbols()
+void CEditWindow::removeLocalSelected( const CSymbolPosition& start, const CSymbolPosition& end )
 {
-	if( symbolSelector.IsGlobalSelection() ) {
-		int startLine, startSymbol;
-		int lastLine, lastSymbol;
-		symbolSelector.GetGlobalSelectionInfo( startLine, startSymbol, lastLine, lastSymbol );
-		if( startLine == content.size() ) {
-			caret.MoveTo( &content[content.size() - 1], content[content.size() - 1].Length() - 1 );
-			return;
-		}
-		if( lastLine == content.size() ) {
-			--lastLine;
-			lastSymbol = content[lastLine].Length() - 1;
-		}
-		if( startLine == lastLine ) {
-			for( int i = startSymbol; i <= lastSymbol; ++i ) {
-				content[startLine].Pop( startSymbol );
-			}
-		} else {
-			int length = content[startLine].Length();
-			for( int i = startSymbol; i < length; ++i ) {
-				content[startLine].Pop( startSymbol );
-			}
-			for( int i = lastSymbol + 1; i < content[lastLine].Length(); ++i ) {
-				content[startLine].Push( content[lastLine][i]->Clone( &content[startLine] ), startSymbol + i );
-			}
-			content.erase( content.begin() + startLine + 1, content.begin() + lastLine + 1 );
-		}
-		caret.MoveTo( &content[startLine], startSymbol );
+	CLineOfSymbols* currentLine = const_cast<CLineOfSymbols*>( start.CurrentLine );
+	for( int i = end.Index; i >= start.Index; --i ) {
+		currentLine->Delete( i );
+	}
+	caret.MoveTo( CSymbolPosition( start.Index, start ) );
+}
+
+void CEditWindow::removeGlobalSelected( const CSymbolPosition& start, const CSymbolPosition& end )
+{
+	int startIdx = getBaseLineIndex( start.CurrentLine );
+	int endIdx = getBaseLineIndex( end.CurrentLine );
+	if( startIdx == endIdx ) {
+		removeLocalSelected( start, end );
 	} else {
-		CLineOfSymbols* baseLine;
-		int startSymbol, lastSymbol;
-		symbolSelector.GetLocalSelectionInfo( baseLine, startSymbol, lastSymbol );
-		for( int i = 0; i <= lastSymbol - startSymbol; ++i ) {
-			baseLine->Pop( startSymbol );
+		removeLocalSelected( start, CSymbolPosition( start.CurrentLine->Length() - 1, start ) );
+		for( int i = startIdx + 1; i < endIdx; ++i ) {
+			if( content[i].Length() != 0 ) {
+				removeLocalSelected( CSymbolPosition( 0, &content[i] ), CSymbolPosition( content[i].Length() - 1, &content[i] ) );
+			}
 		}
-		caret.MoveTo( baseLine, startSymbol );
+		removeLocalSelected( CSymbolPosition( 0, end ), end );
+		for( int i = 0; i < end.CurrentLine->Length(); ++i ) {
+			content[startIdx].PushBack( content[endIdx][i]->Clone( &content[startIdx] ) );
+		}
+		content.erase( content.begin() + startIdx + 1, content.begin() + endIdx + 1 );
+		caret.MoveTo( CSymbolPosition( start.Index, start ) );
 	}
 }
 
@@ -581,7 +445,7 @@ bool CEditWindow::isSymbolAllowed( wchar_t symbol ) const
 // если нет - вернет -1
 int CEditWindow::getBaseLineIndex( const CLineOfSymbols* line ) const
 {
-	for( int i = 0; i < content.size(); ++i ) {
+	for( int i = 0; i < static_cast<int>( content.size() ); ++i ) {
 		if( line == &content[i] ) {
 			return i;
 		}
@@ -598,7 +462,7 @@ void CEditWindow::recalculateHorzScrollParams() const
 
 	int width = 0;
 
-	for( int i = 0; i < content.size(); ++i ) {
+	for( int i = 0; i < static_cast<int>( content.size() ); ++i ) {
 		width = max( content[i].GetWidth(), width );
 	}
 
@@ -627,7 +491,7 @@ void CEditWindow::recalculateVertScrollParams() const
 
 	int height = 0;
 
-	for( int i = 0; i < content.size(); ++i ) {
+	for( int i = 0; i < static_cast<int>( content.size() ); ++i ) {
 		height += content[i].GetHeight();
 	}
 
@@ -651,24 +515,12 @@ void CEditWindow::recalculateVertScrollParams() const
 
 // класс CCaret
 
-CEditWindow::CCaret::CCaret( CEditWindow* _window )
+CEditWindow::CCaret::CCaret( CEditWindow* _window, const CLineOfSymbols* baseLine ) : caretPosition( 0, baseLine )
 {
 	window = _window;
-	line = 0;
-	index = 0;
 	shown = false;
 	height = window->simpleSymbolHeight;
 	width = 2;
-}
-
-CLineOfSymbols* CEditWindow::CCaret::GetLine()
-{
-	return line;
-}
-
-int CEditWindow::CCaret::GetIndex() const
-{
-	return index;
 }
 
 void CEditWindow::CCaret::Create()
@@ -681,7 +533,7 @@ void CEditWindow::CCaret::Show()
 {
 	moveToNewCoordinates();
 	if( !shown ) {
-		shown = ::ShowCaret( window->windowHandle );
+		shown = ::ShowCaret( window->windowHandle ) != 0;
 	}
 }
 
@@ -699,33 +551,44 @@ void CEditWindow::CCaret::Destroy()
 	::DestroyCaret();
 }
 
-void CEditWindow::CCaret::Move( CEditWindow::TDirection direction )
+void CEditWindow::CCaret::Move( CEditWindow::TCaretDirection direction )
 {
 	switch( direction ) {
-	case DUp:
+	case CD_Up:
 		moveUp();
 		break;
-	case DDown:
+	case CD_Down:
 		moveDown();
 		break;
-	case DLeft:
+	case CD_Left:
 		moveLeft();
 		break;
-	case DRight:
+	case CD_Right:
 		moveRight();
 		break;
 	}
 }
 
-void CEditWindow::CCaret::MoveTo( CLineOfSymbols* _line, int _index ) 
+void CEditWindow::CCaret::MoveTo( int x, int y )
 {
-	line = _line;
-	index = _index;
+	std::unique_ptr<const CSymbolPosition> tmp( window->finder.FindPosition( x, y ) );
+	if( tmp->Index == -1 ) {
+		MoveTo( CSymbolPosition( 0, *tmp ) );
+	} else if( tmp->Index == tmp->CurrentLine->Length() ) {
+		MoveTo( *tmp );
+	} else {
+		if( ( *tmp->CurrentLine )[tmp->Index]->GetX() + ( *tmp->CurrentLine )[tmp->Index]->GetWidth() / 2  > x ) {
+			MoveTo( *tmp );
+		} else {
+			MoveTo( CSymbolPosition( tmp->Index + 1, *tmp ) );
+		}
+	}
 }
 
-bool CEditWindow::CCaret::IsShown() const
+void CEditWindow::CCaret::MoveTo( const CSymbolPosition& newPosition ) 
 {
-	return shown;
+	CSymbolPosition tmp( newPosition );
+	std::swap( caretPosition, tmp );
 }
 
 // этот код вынесен в отдельные методы
@@ -746,48 +609,44 @@ void CEditWindow::CCaret::moveDown()
 // сдвигает каретку на единицу влево
 void CEditWindow::CCaret::moveLeft()
 {
-	if( index > 0 ) {
-		--index;
-		moveToNewCoordinates();
-	} else if( window->getBaseLineIndex( line ) > 0 ) {
-		int lineIndex = window->getBaseLineIndex( line ) - 1;
-		line = &( window->content[lineIndex] );
-		index = line->Length();
-		moveToNewCoordinates();
+	if( caretPosition.Index > 0 ) {
+		--caretPosition.Index;
+	} else if( int lineIndex = window->getBaseLineIndex( caretPosition.CurrentLine ) - 1 >= 0 ) {
+		CSymbolPosition tmp( window->content[lineIndex].Length(), &window->content[lineIndex] );
+		std::swap( caretPosition, tmp );
 	}
-
+	moveToNewCoordinates();
 }
 
 // сдвигает каретку на единицу в право
 void CEditWindow::CCaret::moveRight()
 {
-	int lineIndex = window->getBaseLineIndex( line );
-	if( line->Length() > index ) {
-		++index;
-		moveToNewCoordinates();
-	} else if( lineIndex >= 0 && lineIndex + 1 < window->content.size() ) {
-		line = &( window->content[lineIndex + 1] );
-		index = 0;
-		moveToNewCoordinates();
+	int lineIndex = window->getBaseLineIndex( caretPosition.CurrentLine );
+	if( caretPosition.CurrentLine->Length() > caretPosition.Index ) {
+		++caretPosition.Index;
+	} else if( lineIndex >= 0 && lineIndex + 1 < static_cast<int>( window->content.size() ) ) {
+		CSymbolPosition tmp( 0, &window->content[lineIndex + 1] );
+		std::swap( caretPosition, tmp );
 	}
+	moveToNewCoordinates();
+
 }
 
 void CEditWindow::CCaret::moveToNewCoordinates()
 {
-	int x, y;
-	int newHeight = height;
-	if( line->Length() == 0 ) {
-		x = line->GetX();
-		y = line->GetY();
-		newHeight = line->GetHeight();
-	} else if( index == 0 ) {
-		newHeight = ( *line )[index]->GetHeight();
-		x = ( *line )[index]->GetX();
-		y = ( *line )[index]->GetY();
+	const CLineOfSymbols* caretLine = caretPosition.CurrentLine;
+	int caretIndex = caretPosition.Index;
+	int newHeight = caretLine->GetHeight();
+
+	int x;
+	int y = caretLine->GetY();
+	if( caretLine->Length() == 0 ) {
+		x = caretLine->GetX();
+		newHeight = caretLine->GetHeight();
+	} else if( caretIndex == 0 ) {
+		x = ( *caretLine )[caretIndex]->GetX();
 	} else {
-		newHeight = ( *line )[index - 1]->GetHeight();
-		x = ( *line )[index - 1]->GetX() + ( *line )[index - 1]->GetWidth();
-		y = ( *line )[index - 1]->GetY();
+		x = ( *caretLine )[caretIndex - 1]->GetX() + ( *caretLine )[caretIndex - 1]->GetWidth();
 	}
 	if( newHeight > 0 && newHeight != height ) {
 		changeHeight( newHeight );

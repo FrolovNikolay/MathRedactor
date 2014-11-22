@@ -68,6 +68,7 @@
   <ItemGroup>
     <ClCompile Include="CommandHandler.cpp" />
     <ClCompile Include="EditWindow.cpp" />
+    <ClCompile Include="EditWindowDrawer.cpp" />
     <ClCompile Include="FractionSymbol.cpp" />
     <ClCompile Include="FunctionSymbol.cpp" />
     <ClCompile Include="IndexSymbol.cpp" />
@@ -76,20 +77,25 @@
     <ClCompile Include="LineOfSymbols.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainWindow.cpp" />
+    <ClCompile Include="PositionFinder.cpp" />
     <ClCompile Include="RootSymbol.cpp" />
     <ClCompile Include="SigmaSymbol.cpp" />
     <ClCompile Include="SimpleSymbol.cpp" />
+    <ClInclude Include="PositionFinder.h" />
+    <ClInclude Include="SymbolPosition.h">
+      <FileType>CppCode</FileType>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CommandHandler.h" />
     <ClInclude Include="EditWindow.h" />
+    <ClInclude Include="EditWindowDrawer.h" />
     <ClInclude Include="FractionSymbol.h" />
     <ClInclude Include="FunctionSymbol.h" />
     <ClInclude Include="instruments.h" />
     <ClInclude Include="ItemSelector.h" />
     <ClInclude Include="LineOfSymbols.h" />
     <ClInclude Include="MainWindow.h" />
-    <ClInclude Include="resource.h" />
     <ClInclude Include="RibbonIDs.h" />
     <ClInclude Include="RootSymbol.h" />
     <ClInclude Include="SimpleSymbol.h" />
@@ -107,10 +113,15 @@
     <ResourceCompile Include="RibbonResource.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="Res\accept.bmp" />
+    <Image Include="Res\export.bmp" />
     <Image Include="Res\fraction.bmp" />
     <Image Include="Res\func.bmp" />
+    <Image Include="Res\import.bmp" />
     <Image Include="Res\lowerIndex.bmp" />
     <Image Include="Res\pi_for_mult.bmp" />
+    <Image Include="Res\play.bmp" />
+    <Image Include="Res\reject.bmp" />
     <Image Include="Res\sigma.bmp" />
     <Image Include="Res\sqrt.bmp" />
     <Image Include="Res\upperIndex.bmp" />

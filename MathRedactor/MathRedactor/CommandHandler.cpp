@@ -1,11 +1,14 @@
 ﻿// Автор: Федюнин Валерий
 
+#include "CommandHandler.h"
+
+#include <assert.h>
+
 #include "FractionSymbol.h"
 #include "SimpleSymbol.h"
 #include "SigmaSymbol.h"
 #include "IndexSymbol.h"
 #include "RootSymbol.h"
-#include "CommandHandler.h"
 #include "RibbonIDs.h"
 #include "FunctionSymbol.h"
 
@@ -49,84 +52,91 @@ STDMETHODIMP CCommandHandler::Execute( UINT nCmdId, UI_EXECUTIONVERB verb, const
 	const PROPVARIANT* propvarValue, IUISimplePropertySet* pCommandExecutionProperties )
 {
 	switch( nCmdId ) {
+		case ID_CMD_ACCEPT:
+			::MessageBox( 0, L"Здесь функция отрисовки нового графика", L"TODO", MB_OK );
+			break;
+		case ID_CMD_REJECT:
+			::MessageBox( 0, L"Здесь функция отказа от нового графика", L"TODO", MB_OK );
+			break;
+		case ID_CMD_EXPORT:
+			::MessageBox( 0, L"Здесь функция экспорта", L"TODO", MB_OK );
+			break;
+		case ID_CMD_IMPORT:
+			::MessageBox( 0, L"Здесь функция импорта", L"TODO", MB_OK );
+			break;
+		case ID_CMD_CHECK:
+			::MessageBox( 0, L"Здесь проверка на вычислимость", L"TODO", MB_OK );
+			break;
 		case ID_CMD_SIGMA:
 		{
 			CSigmaSymbol* sigma = new CSigmaSymbol( editWindow->GetCaretLine()->GetSimpleSymbolHeight(), bigSigmaSymbol );
-			sigma->GetUpperLine().Push( new CSimpleSymbol( L'9' ), 0 );
-			sigma->GetLowerLine().Push( new CSimpleSymbol( L'1' ), 0 );
 			editWindow->AddSymbol( sigma );
 			break;
 		}
 		case ID_CMD_PIMUL:
 		{
 			CSigmaSymbol* sigma = new CSigmaSymbol( editWindow->GetCaretLine()->GetSimpleSymbolHeight(), bigPiSymbol );
-			sigma->GetUpperLine().Push( new CSimpleSymbol( L'9' ), 0 );
-			sigma->GetLowerLine().Push( new CSimpleSymbol( L'1' ), 0 );
 			editWindow->AddSymbol( sigma );
 			break;
 		}
 		case ID_CMD_FRACTION:
 		{
 			CFractionSymbol* fraction = new CFractionSymbol( editWindow->GetCaretLine()->GetSimpleSymbolHeight() );
-			fraction->GetUpperLine().Push( new CSimpleSymbol( L'1' ), 0 );
-			fraction->GetLowerLine().Push( new CSimpleSymbol( L'2' ), 0 );
 			editWindow->AddSymbol( fraction );
 			break;
 		}
 		case ID_CMD_LOWER_INDEX:
 		{
 			CIndexSymbol* lowerIndex = new CIndexSymbol( editWindow->GetCaretLine()->GetSimpleSymbolHeight( ), CIndexSymbol::ITLower );
-			lowerIndex->GetLine().Push( new CSimpleSymbol( L't' ), 0 );
-			lowerIndex->GetLine().Push( new CSimpleSymbol( L'm' ), 1 );
-			lowerIndex->GetLine().Push( new CSimpleSymbol( L'p' ), 2 );
 			editWindow->AddSymbol( lowerIndex );
 			break;
 		}
 		case ID_CMD_UPPER_INDEX:
 		{
 			CIndexSymbol* upperIndex = new CIndexSymbol( editWindow->GetCaretLine()->GetSimpleSymbolHeight(), CIndexSymbol::ITUpper );
-			upperIndex->GetLine().Push( new CSimpleSymbol( L't' ), 0 );
-			upperIndex->GetLine().Push( new CSimpleSymbol( L'm' ), 1 );
-			upperIndex->GetLine().Push( new CSimpleSymbol( L'p' ), 2 );
 			editWindow->AddSymbol( upperIndex );
 			break;
 		}
 		case ID_CMD_SQRT:
 		{
 			CRootSymbol* root = new CRootSymbol( editWindow->GetCaretLine()->GetSimpleSymbolHeight() );
-			root->GetExponentLine().Push( new CSimpleSymbol( L'2' ), 0 );
-			root->GetRadicandLine().Push( new CSimpleSymbol( L'x' ), 0 );
 			editWindow->AddSymbol( root );
 			break;
 		}
 		case ID_CMD_SIN:
 		{
 			CFunctionSymbol *func = new CFunctionSymbol( editWindow->GetCaretLine()->GetSimpleSymbolHeight(), L"sin" );
-			func->GetArgumentLine().PushBack( new CSimpleSymbol( L'x' ) );
 			editWindow->AddSymbol( func );
 			break;
 		}
 		case ID_CMD_COS:
 		{
 			CFunctionSymbol *func = new CFunctionSymbol( editWindow->GetCaretLine()->GetSimpleSymbolHeight(), L"cos" );
-			func->GetArgumentLine().PushBack( new CSimpleSymbol( L'x' ) );
 			editWindow->AddSymbol( func );
 			break;
 		}
 		case ID_CMD_TAN:
 		{
 			CFunctionSymbol *func = new CFunctionSymbol( editWindow->GetCaretLine()->GetSimpleSymbolHeight(), L"tan" );
-			func->GetArgumentLine().PushBack( new CSimpleSymbol( L'x' ) );
 			editWindow->AddSymbol( func );
 			break;
 		}
 		case ID_CMD_CTG:
 		{
 			CFunctionSymbol *func = new CFunctionSymbol( editWindow->GetCaretLine()->GetSimpleSymbolHeight(), L"ctg" );
-			func->GetArgumentLine().PushBack( new CSimpleSymbol( L'x' ) );
 			editWindow->AddSymbol( func );
 			break;
 		}
+		// вынужденная мера, ибо DropDownButton представляет собой набор отдельных кнопок
+		case ID_CMD_Y_FX:
+		case ID_CMD_Z_FXY:
+		case ID_CMD_XY_T:
+		case ID_CMD_XYZ_T:
+		case ID_CMD_XYZ_TL:
+			::MessageBox( 0, L"Здесь будем переключать тип функции", L"TODO", MB_OK );
+			break;
+		default:
+			assert( false );
 	}
 
 	return S_OK;

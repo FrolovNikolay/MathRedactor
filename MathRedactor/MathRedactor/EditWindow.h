@@ -1,5 +1,6 @@
-﻿// Автор: Федюнин Валерий
-// Описание: класс окна, в котором отрисовываются и изменяются формулы
+﻿// Автор: Федюнин Валерий.
+
+// Описание: класс окна, в котором отрисовываются и изменяются формулы.
 
 #pragma once
 
@@ -7,15 +8,25 @@
 #include <vector>
 #include "LineOfSymbols.h"
 #include "ItemSelector.h"
+#include "PositionFinder.h"
+#include "EditWindowDrawer.h"
 
 class CEditWindow {
 public:
-	CEditWindow();
-	~CEditWindow();
+	// возможные направления движения каретки
+	enum TCaretDirection {
+		CD_Up,
+		CD_Down,
+		CD_Left,
+		CD_Right
+	};
 
-	//Временно
+	CEditWindow();
+
+	// Временно
 	int GetSimpleSymbolHeight() const { return simpleSymbolHeight; }
-	CLineOfSymbols* GetCaretLine() { return caret.GetLine(); }
+
+	CLineOfSymbols* GetCaretLine() { return const_cast<CLineOfSymbols*>( caret.GetLine() ); }
 
 	// регистрирует класс окна
 	static bool RegisterClass( HINSTANCE );
@@ -34,19 +45,12 @@ public:
 	// Переводит строчку
 	void NewLine();
 	
-	// возможные направления движения каретки
-	enum TDirection {
-		DUp, DDown, DLeft, DRight
-	};
 	// Отображает каретку
 	void ShowCaret();
 	// Скрывает каретку
 	void HideCaret();
 	// Двигает каретку на шаг по направлению
-	void MoveCaret( TDirection );
-	// Двигает каретку к данной точке
-	void MoveCaretTo( int x, int y );
-
+	void MoveCaret( TCaretDirection );
 
 protected:
 	// метод, вызываемый при получении окном сообщения WM_DESTROY
@@ -67,34 +71,16 @@ protected:
 	void OnLockedMouseMove( LPARAM );
 
 private:
-	// хэндл окна, которому соответствует этот объект класса.
-	HWND windowHandle;
-	// имя класса окна
-	static const wchar_t* className;
-
-	//Содержимое редактора (массив строк)
-	std::vector<CLineOfSymbols> content;
-	
-	//TODO: Сделать нормальные настройки
-	int simpleSymbolHeight;
-
-	// для скроллирования
-	const int horizontalScrollUnit;
-	const int verticalScrollUnit;
-
-	// связанный с окном механизм для выделения
-	CItemSelector symbolSelector;
-	
 	// Класс каретки для этого типа окна
 	class CCaret {
 	public:
-		CCaret( CEditWindow* );
+		CCaret( CEditWindow* , const CLineOfSymbols* baseLine );
 
-		CLineOfSymbols* GetLine();
-		int GetIndex() const;
+		const CLineOfSymbols* GetLine() const { return caretPosition.CurrentLine; }
+		int GetIndex() const { return caretPosition.Index; }
 
 		// видит ли пользователь каретку в данный момент
-		bool IsShown() const;
+		bool IsShown() const { return shown; }
 
 		void Create();
 		void Destroy();
@@ -104,22 +90,20 @@ private:
 		void Hide();
 		
 		// сдвигает каретку на единицу в данном направлении
-		void Move( TDirection );
+		void Move( TCaretDirection );
 		// сдвигает каретку в определенную позицию
-		void MoveTo( CLineOfSymbols*, int );
+		void MoveTo( const CSymbolPosition& );
+
+		void MoveTo( int x, int y );
 
 	private:
 		// окно, которому принадлежит каретка
 		CEditWindow* window;
+		// положение каретки
+		CSymbolPosition caretPosition;
 		// текущий размер каретки
 		int width;
 		int height;
-		// положение каретки
-		// линия, в которой находится каретка
-		CLineOfSymbols* line;
-		// индекс символа, перед которым стоит каретка
-		// если равен длине строки - каретка стоит в конце строки
-		int index;
 		// отображается ли каретка в данный момент
 		bool shown;
 
@@ -131,19 +115,40 @@ private:
 		void moveToNewCoordinates();
 		void changeHeight( int );
 	};
+	// хэндл окна, которому соответствует этот объект класса.
+	HWND windowHandle;
+	// имя класса окна
+	static const wchar_t* className;
+	
+	const int simpleSymbolHeight;
+
+	//Содержимое редактора (массив строк)
+	std::vector<CLineOfSymbols> content;
+
+	// для скроллирования
+	const int horizontalScrollUnit;
+	const int verticalScrollUnit;
+
+	CPositionFinder finder;
+	CItemSelector symbolSelector;
+	CEditWindowDrawer drawer;
 
 	// каретка
 	CCaret caret;
 
-	static LRESULT __stdcall windowProcedure( HWND, UINT, WPARAM, LPARAM );
-
 	CLineOfSymbols* isLineBase( CLineOfSymbols* currentBaseLine, int x, int y );
 
-	void removeSelectedSymbols();
+	void removeSelectedItems();
+
+	void removeLocalSelected( const CSymbolPosition&, const CSymbolPosition& );
+
+	void removeGlobalSelected( const CSymbolPosition&, const CSymbolPosition& );
 
 	bool isSymbolAllowed( wchar_t ) const;
 	int getBaseLineIndex( const CLineOfSymbols* ) const;
 
 	void recalculateVertScrollParams() const;
 	void recalculateHorzScrollParams() const;
+
+	static LRESULT __stdcall windowProcedure( HWND, UINT, WPARAM, LPARAM );
 };
